@@ -11,17 +11,33 @@
 ### Create module
 `nest generate module <name>`
 
-`nest g mo <name>`
+`nest g mo <name> --no-spec`
 
 ### Create controller
 `nest generate controller <name>`
 
-`nest g co <name>`
+`nest g co <name> --no-spec`
 
 ### Create service (provider)
 `nest generate service <name>`
 
-`nest g s <name>`
+`nest g s <name> --no-spec`
+
+### Add packages
+#### DB management
+
+`npm add -D prisma`
+
+`npm add -D @prisma/client`
+
+##### Initialize prisma
+`npx prisma init`
+
+#### Form validation
+`npm add -D class-validator class-transformer`
+
+#### Password hashing
+`npm add argon2`
 
 ### Decorators
 - `@Injectable()`: Make a resource injectable via DI
