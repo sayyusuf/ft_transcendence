@@ -1,29 +1,29 @@
 # NestJS
-## Install nestjs
+### Install nestjs
 `npm i -g @nestjs/cli`
 
-## Create new project
+### Create new project
 `nest new <project-name>`
 
-## Run server in development mode
+### Run server in development mode
 `npm run start:dev`
 
-## Create module
+### Create module
 `nest generate module <name>`
 
 `nest g mo <name>`
 
-## Create controller
+### Create controller
 `nest generate controller <name>`
 
 `nest g co <name>`
 
-## Create service (provider)
+### Create service (provider)
 `nest generate service <name>`
 
 `nest g s <name>`
 
-## Decorators
+### Decorators
 - `@Injectable()`: Make a resource injectable via DI
 - `@Controller('route')`:
 - `@Get()`, `@Post('user/:id/update')`
@@ -35,16 +35,16 @@
 - `@IsNumber()`, `@IsString()`: Validations
 
 # React 
-## Install reactjs
+### Install reactjs
 `npm i -g create-react-app`
 
-## Create new project
+### Create new project
 `create-react-app <project-name> --template typescript`
 
 `npx create-react-app <project-name> --template typescript`
 
-## Run frontend
+### Run frontend
 `npm start`
 
-## Deploy to production
+### Deploy to production
 `npm run build`
