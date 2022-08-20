@@ -9,13 +9,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModule = void 0;
 const axios_1 = require("@nestjs/axios");
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const user_controller_1 = require("./user.controller");
 const user_service_1 = require("./user.service");
 let UserModule = class UserModule {
 };
 UserModule = __decorate([
     (0, common_1.Module)({
-        imports: [axios_1.HttpModule],
+        imports: [
+            axios_1.HttpModule,
+            platform_express_1.MulterModule.register({
+                dest: './public'
+            })
+        ],
         controllers: [user_controller_1.UserController],
         providers: [user_service_1.UserService]
     })

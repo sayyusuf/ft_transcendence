@@ -6,6 +6,7 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Authorize from "./pages/Authorize";
+import Settings from "./pages/Settings";
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/" element={<Layout/>}>
               <Route index={true} element={<PrivateRoute> <Dashboard/> </PrivateRoute>} />
               <Route path="profile" element={<PrivateRoute> <Profile/> </PrivateRoute>} />
+              <Route path="settings" element={<PrivateRoute> <Settings/> </PrivateRoute>} />
         </Route>      
         <Route path="/login" element={<Login/>} />
         <Route path="/auth" element={<Authorize/>} />

@@ -9,19 +9,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserDto = void 0;
+exports.ChangeNickDto = void 0;
 const class_validator_1 = require("class-validator");
-class UserDto {
+class ChangeNickDto {
 }
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UserDto.prototype, "nick", void 0);
+], ChangeNickDto.prototype, "nick", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], UserDto.prototype, "id", void 0);
-exports.UserDto = UserDto;
-//# sourceMappingURL=user.dto.js.map
+], ChangeNickDto.prototype, "id", void 0);
+exports.ChangeNickDto = ChangeNickDto;
+//# sourceMappingURL=changenick.dto.js.map

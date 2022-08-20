@@ -16,6 +16,7 @@ model User {
   avatar  String?
 
   email String
+  login String
   name  String
   surname String
   status  Int

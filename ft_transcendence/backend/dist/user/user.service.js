@@ -37,13 +37,20 @@ let UserService = class UserService {
             throw new common_1.HttpException('Error occured', common_1.HttpStatus.FORBIDDEN);
         }
     }
-    async getUser(accessObject) {
+    async getIntraUser(accessObject) {
         try {
             const data = await (0, rxjs_1.lastValueFrom)(this.httpService.get('https://api.intra.42.fr/v2/me', {
                 headers: {
                     'Authorization': `Bearer ${accessObject.access_token}`
                 }
             }).pipe((0, rxjs_1.map)(resp => resp.data)));
+            const coalitionData = await (0, rxjs_1.lastValueFrom)(this.httpService.get(`https://api.intra.42.fr/v2/users/${data.id}/coalitions`, {
+                headers: {
+                    'Authorization': `Bearer ${accessObject.access_token}`
+                }
+            }).pipe((0, rxjs_1.map)(resp => resp.data)));
+            data.coalition_img = coalitionData[0].cover_url;
+            data.coalition_color = coalitionData[0].color;
             return data;
         }
         catch (_a) {
@@ -65,9 +72,24 @@ let UserService = class UserService {
             throw new common_1.HttpException('Error occured', common_1.HttpStatus.FORBIDDEN);
         }
     }
-    getUserByNick(nick) {
+    async getUserByLogin(login) {
         try {
-            const userExist = this.context.user.findUnique({
+            const userExist = await this.context.user.findFirst({
+                where: {
+                    login: login
+                }
+            });
+            if (userExist)
+                return userExist;
+            return null;
+        }
+        catch (_a) {
+            throw new common_1.HttpException('Error occured', common_1.HttpStatus.FORBIDDEN);
+        }
+    }
+    async getUserByNick(nick) {
+        try {
+            const userExist = await this.context.user.findUnique({
                 where: {
                     nick: nick
                 }
@@ -85,17 +107,19 @@ let UserService = class UserService {
             const user = this.context.user.create({
                 data: {
                     nick: userData.login,
-                    avatar: '',
+                    avatar: `${this.config.get('API_URL')}/default.png`,
                     email: userData.email,
                     name: userData.first_name,
                     surname: userData.last_name,
+                    login: userData.login,
                     status: 0,
                     win: 0,
                     lose: 0,
                     level: 0
                 }
             });
-            return user;
+            const retUser = Object(user);
+            return retUser;
         }
         catch (_a) {
             throw new common_1.HttpException('Error occured', common_1.HttpStatus.FORBIDDEN);
@@ -104,15 +128,59 @@ let UserService = class UserService {
     async authUser(code) {
         try {
             const accessObject = await this.getToken(code);
-            const userData = await this.getUser(accessObject);
-            const userExist = await this.getUserByNick(userData.login);
-            if (!userExist)
-                return this.addNewUser(userData);
-            return userExist;
+            const userData = await this.getIntraUser(accessObject);
+            const userExist = await this.getUserByLogin(userData.login);
+            let retUser;
+            if (!userExist) {
+                retUser = Object(this.addNewUser(userData));
+                retUser.coalition_img = userData.coalition_img;
+                retUser.coalition_color = userData.coalition_color;
+                return retUser;
+            }
+            retUser = Object(userExist);
+            retUser.coalition_img = userData.coalition_img;
+            retUser.coalition_color = userData.coalition_color;
+            return retUser;
         }
         catch (_a) {
             throw new common_1.HttpException('Error occured', common_1.HttpStatus.FORBIDDEN);
         }
+    }
+    async changeNickName(changeNickDto) {
+        const { nick, id } = changeNickDto;
+        const userExist = await this.getUserByNick(nick);
+        if (userExist)
+            throw new common_1.HttpException('Nickname already taken', common_1.HttpStatus.FORBIDDEN);
+        const user = this.context.user.findUnique({
+            where: {
+                id: id
+            }
+        });
+        if (!user)
+            throw new common_1.HttpException('User not found', common_1.HttpStatus.FORBIDDEN);
+        await this.context.user.update({
+            where: {
+                id: id
+            },
+            data: {
+                nick: nick
+            }
+        });
+        return { nick: nick };
+    }
+    async changeAvatar(id) {
+        const userExist = await this.getUserById(Number(id));
+        if (!userExist)
+            throw new common_1.HttpException('User not found', common_1.HttpStatus.FORBIDDEN);
+        const updatedUser = await this.context.user.update({
+            where: {
+                id: Number(id),
+            },
+            data: {
+                avatar: `${this.config.get('API_URL')}/${userExist.login}.jpg`
+            }
+        });
+        return updatedUser;
     }
 };
 UserService = __decorate([

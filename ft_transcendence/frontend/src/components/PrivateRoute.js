@@ -9,7 +9,6 @@ export default function PrivateRoute({children}){
 		return (
 			<Navigate to="/login" />
 		)
-
 	// eger acmamissa yonlendirme
 	// eger acmissa childreni render et
 

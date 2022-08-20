@@ -14,6 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const path_1 = require("path");
+const changenick_dto_1 = require("./dto/changenick.dto");
 const user_service_1 = require("./user.service");
 let UserController = class UserController {
     constructor(userService) {
@@ -27,6 +31,14 @@ let UserController = class UserController {
     }
     getUserById(id) {
         return this.userService.getUserById(parseInt(id));
+    }
+    async updateNickanme(changeNickDto) {
+        return await this.userService.changeNickName(changeNickDto);
+    }
+    async updateAvatar(file, id) {
+        console.log('file ', file);
+        console.log('id ', id);
+        return await this.userService.changeAvatar(id);
     }
 };
 __decorate([
@@ -50,6 +62,31 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "getUserById", null);
+__decorate([
+    (0, common_1.Post)('change-nickname'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [changenick_dto_1.ChangeNickDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateNickanme", null);
+__decorate([
+    (0, common_1.Post)('change-avatar'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './public',
+            filename: (req, file, callback) => {
+                const ext = (0, path_1.extname)(file.originalname);
+                const filename = `${file.originalname}`;
+                callback(null, filename);
+            }
+        })
+    })),
+    __param(0, (0, common_1.UploadedFile)()),
+    __param(1, (0, common_1.Body)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateAvatar", null);
 UserController = __decorate([
     (0, common_1.Controller)('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])

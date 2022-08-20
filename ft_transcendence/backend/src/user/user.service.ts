@@ -3,7 +3,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom, lastValueFrom, map } from 'rxjs';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserDto } from './dto/user.dto';
+import { ChangeNickDto } from './dto/changenick.dto';
 
 @Injectable()
 export class UserService {
@@ -28,7 +28,7 @@ export class UserService {
 		}
 	}
 
-	async getUser(accessObject){
+	async getIntraUser(accessObject){
 		try {
 			const data = await lastValueFrom(
 				this.httpService.get('https://api.intra.42.fr/v2/me', {
@@ -39,6 +39,17 @@ export class UserService {
 				  map(resp => resp.data)
 				)
 			  );
+			const coalitionData = await lastValueFrom(
+				this.httpService.get(`https://api.intra.42.fr/v2/users/${data.id}/coalitions`, {
+					headers:{
+						'Authorization' : `Bearer ${accessObject.access_token}`
+					}
+				}).pipe(
+				  map(resp => resp.data)
+				)
+			  );
+			  data.coalition_img = coalitionData[0].cover_url
+			  data.coalition_color = coalitionData[0].color
 			  return data
 		}
 		catch{
@@ -64,15 +75,32 @@ export class UserService {
 		}
 	}
 
-	getUserByNick(nick:string){
+	async getUserByLogin(login:string){
 		try
 		{
-			const userExist = this.context.user.findUnique({
+			const userExist = await this.context.user.findFirst({
+				where: {
+					login: login
+				}
+			})
+			if (userExist)
+				return userExist
+			return null
+		}
+		catch
+		{
+			throw new HttpException('Error occured', HttpStatus.FORBIDDEN)
+		}
+	}
+
+	async getUserByNick(nick:string){
+		try
+		{
+			const userExist = await this.context.user.findUnique({
 				where: {
 					nick: nick
 				}
 			})
-
 			if (userExist)
 				return userExist
 			return null
@@ -88,17 +116,19 @@ export class UserService {
 			const user = this.context.user.create({
 				data:{
 					nick: userData.login,
-					avatar: '',
+					avatar: `${this.config.get('API_URL')}/default.png`,
 					email: userData.email,
 					name: userData.first_name,
 					surname: userData.last_name,
+					login: userData.login,
 					status:0,
 					win:0,
 					lose:0,
 					level:0
 				}
 			})
-			return user
+			const retUser = Object(user)
+			return retUser
 		}
 		catch{
 			throw new HttpException('Error occured', HttpStatus.FORBIDDEN)
@@ -109,11 +139,19 @@ export class UserService {
 		try
 		{
 			const accessObject = await this.getToken(code)
-			const userData = await this.getUser(accessObject)
-			const userExist = await this.getUserByNick(userData.login)
-			if (!userExist)
-				return this.addNewUser(userData)
-			return userExist
+			const userData = await this.getIntraUser(accessObject)
+			const userExist = await this.getUserByLogin(userData.login)
+			let retUser
+			if (!userExist){
+				retUser = Object(this.addNewUser(userData))
+				retUser.coalition_img = userData.coalition_img
+				retUser.coalition_color = userData.coalition_color
+				return retUser
+			}
+			retUser = Object(userExist)
+			retUser.coalition_img = userData.coalition_img
+			retUser.coalition_color = userData.coalition_color
+			return retUser
 		}
 		catch
 		{
@@ -121,4 +159,42 @@ export class UserService {
 		}
 	}
 
+	async changeNickName(changeNickDto: ChangeNickDto){
+		const {nick, id} = changeNickDto
+
+		const userExist = await this.getUserByNick(nick)
+		if (userExist)
+			throw new HttpException('Nickname already taken', HttpStatus.FORBIDDEN)
+		const user = this.context.user.findUnique({
+			where:{
+				id:id
+			}
+		})
+		if (!user)
+			throw new HttpException('User not found', HttpStatus.FORBIDDEN)
+		await this.context.user.update({
+			where:{
+				id: id
+			},
+			data:{
+				nick: nick
+			}
+		})
+		return {nick: nick}
+	}
+
+	async changeAvatar(id){
+		const userExist = await this.getUserById(Number(id))
+		if (!userExist)
+			throw new HttpException('User not found', HttpStatus.FORBIDDEN)
+		const updatedUser = await this.context.user.update({
+			where:{
+				id: Number(id),
+			},
+			data:{
+				avatar: `${this.config.get('API_URL')}/${userExist.login}.jpg`
+			}
+		})
+		return updatedUser
+	}
 }

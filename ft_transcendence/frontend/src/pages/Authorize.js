@@ -14,11 +14,15 @@ const Authorize = () => {
 	
 	useEffect(() => {
 		const url = `${process.env.REACT_APP_API_URL}/user/auth?code=${code}`
-		const fetchData = async () => {
+		/*const fetchData = async () => {
 			const response = await axios.get(url).catch(() => setUser(false))
 			setUser(response.data)
 		}
-		fetchData()
+		fetchData()*/
+		axios.get(url)
+		.then(response => {
+			setUser(response.data)
+		})
 	}, [])
 	return (
 		<Navigate to="/" />

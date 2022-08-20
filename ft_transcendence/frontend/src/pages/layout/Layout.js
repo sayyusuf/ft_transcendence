@@ -26,6 +26,7 @@ const Layout = () => {
 				<Nav className="me-auto">
 					<NavLink to="/" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Home</NavLink>	
 					<NavLink to="/profile" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Profile</NavLink>
+					<NavLink to="/settings" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Settings</NavLink>
 					<a style={{cursor: "pointer"}} onClick={handleLogout} className="nav-link">Çıkış yap</a>
 				</Nav>
 				</Container>
