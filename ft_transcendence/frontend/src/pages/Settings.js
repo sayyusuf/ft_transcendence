@@ -1,5 +1,5 @@
 import axios from "axios"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Row, Col, Form, Button, Modal } from "react-bootstrap"
 import { useAuth } from "../context/AuthContext"
 
@@ -8,10 +8,58 @@ export default function Settings() {
 	const { user, setUser } = useAuth()
 	const [nickname, setNickname] = useState(user.nick)
 	const [show, setShow] = useState(false);
+	const [showAvatar, setShowAvatar] = useState(false)
 	const [changeSuccess, setChangeSuccess] = useState(false);
 	const [avatarValue, setAvatarValue] = useState('')
+	const [qrData, setQRData] = useState(false)
+	const [factorState, setFactorState] = useState(user.two_factor_enabled)
+
 	const handleClose = () => setShow(false);
   	const handleShow = () => setShow(true);
+	const handleAvatarClose = () => setShowAvatar(false);
+  	const handleAvatarShow = () => setShowAvatar(true);
+
+
+	useEffect(() => {
+		if (!user.two_factor_enabled){
+			const payload = {
+				id: user.id,		
+			}
+			axios.post(`${process.env.REACT_APP_API_URL}/user/generate`, payload)
+			.then(res => setQRData(res.data))
+		}
+	},[factorState])
+
+	const changeFactorHandle = () => {
+		const url = `${process.env.REACT_APP_API_URL}/user/verify`;
+		const payload = {
+			id: user.id,
+			token: document.getElementById('factor').value
+		}
+		axios.post(url,  payload).then(response => {
+			if (!response.data){
+				alert('Verification code is wrong')
+				return;
+			}
+			axios.post(`${process.env.REACT_APP_API_URL}/user/change-factor`,{
+				id:user.id
+			}).then(() => alert('Two-Factor Authantication enabled'))
+			user.two_factor_enabled = true
+			const newUser = JSON.parse(JSON.stringify(user))
+			setFactorState(true)
+			setUser(newUser)
+		}).catch(() => alert('Error occured'))
+	}
+
+	const disableFactorHandle = () => {
+		axios.post(`${process.env.REACT_APP_API_URL}/user/change-factor`,{
+				id:user.id
+			}).then(() => alert('Two-Factor Authantication disabled'))
+		user.two_factor_enabled = false
+		const newUser = JSON.parse(JSON.stringify(user))
+		setFactorState(false)
+		setUser(newUser)
+	}
 
 	const changeNicknameHandle = () => {
 		const data = {
@@ -21,8 +69,9 @@ export default function Settings() {
 		axios.post(`${process.env.REACT_APP_API_URL}/user/change-nickname`, data)
 		.then(response => {
 			user.nick = response.data.nick
+			const newUser = JSON.parse(JSON.stringify(user))
 			setChangeSuccess(true)
-			setUser(user)
+			setUser(newUser)
 			handleShow()
 		})
 		.catch(error => {
@@ -72,13 +121,10 @@ export default function Settings() {
 
 	const changeAvatarHandle = () => {
 		const url = `${process.env.REACT_APP_API_URL}/user/change-avatar`;
-		console.log(avatarValue.file.name)
 		const postedFile = avatarValue.file
 		const filename = postedFile.name
 		const newFileName = user.login + filename.substring(filename.lastIndexOf('.'), filename.length) || filename;
 		const willBeUploadedFile = new File([postedFile], newFileName)
-
-
 		const formData = new FormData()
 		formData.append('file', willBeUploadedFile)
 		formData.append('id', user.id)
@@ -88,9 +134,11 @@ export default function Settings() {
 			}
 		}
 		axios.post(url,  formData, config).then(respone => {
-			user.avatar = `${process.env.REACT_APP_API_URL}/${user.login}.jpg`
-			setUser(user)
-		})
+			const newUser = user
+			newUser.avatar = `${process.env.REACT_APP_API_URL}/${user.login}.jpg`
+			setUser(newUser)
+			handleAvatarShow()
+		}).catch(() => alert('Only .jpg files are accepted'))
 	}
 	
 	return (
@@ -110,7 +158,7 @@ export default function Settings() {
 
 				<Col className="col-8">
 					<Form.Group onChange={e => setAvatarValue({file:e.target.files[0]})} value={avatarValue} controlId="formFile" className="mb-3">
-						<Form.Label>Default file input example</Form.Label>
+						<Form.Label>Choose your avatar</Form.Label>
 						<Form.Control type="file" accept=".jpg" />
 					</Form.Group>
 				</Col>
@@ -119,14 +167,47 @@ export default function Settings() {
 						Change Avatar
 					</Button>
 				</Col>
+				<Col className="col-12">
+					{!factorState ? (
+						<Row>
+						<Col className="col-2" >
+							<img src={qrData}></img>
+						</Col>
+						<Col className="col-10" >
+							<p style={{width:'180px'}}>To enable two-factor authantication open your Google Authenticator app, scan the QR code and enter the 6-digit code on screen</p>
+						</Col>
+						<Col className="col-3 mt-2">
+						<Form.Control  id="factor" type="number" min="0" />
+						</Col>
+						<Col className="col-4 mt-2">
+							<Button onClick={changeFactorHandle}  variant="success">Enable</Button>
+						</Col>
+						</Row>
+					) : (
+						<Button onClick={disableFactorHandle}  variant="danger">Disable</Button>
+					)}						
+					
+					
+					
+				</Col>
 			</Row>
-
-
-
 
 			<Modal show={show} onHide={handleClose}>
 				<ModalContent />
 			</Modal>
+
+			<Modal show={showAvatar} onHide={handleAvatarClose}>
+						<Modal.Header closeButton>
+							<Modal.Title>Success</Modal.Title>
+						</Modal.Header>
+						<Modal.Body>Avatar has been changed successfully</Modal.Body>
+						<Modal.Footer>
+							<Button variant="secondary" onClick={handleAvatarClose}>
+								Close
+							</Button>				
+						</Modal.Footer>
+			</Modal>
+
 		</>
 		
 	)

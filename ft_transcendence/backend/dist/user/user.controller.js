@@ -36,9 +36,16 @@ let UserController = class UserController {
         return await this.userService.changeNickName(changeNickDto);
     }
     async updateAvatar(file, id) {
-        console.log('file ', file);
-        console.log('id ', id);
         return await this.userService.changeAvatar(id);
+    }
+    async generate2FA(id) {
+        return await this.userService.generateSecretAndQRCode(Number(id));
+    }
+    async verify2fa(id, token) {
+        return await this.userService.verify2fa(id, token);
+    }
+    async changeFactor(id) {
+        return await this.userService.changeFactor(id);
     }
 };
 __decorate([
@@ -79,14 +86,48 @@ __decorate([
                 const filename = `${file.originalname}`;
                 callback(null, filename);
             }
-        })
+        }),
+        fileFilter: (req, file, cb) => {
+            if (['image/jpg'].includes(file.mimetype)) {
+                cb(null, true);
+            }
+            else {
+                cb(new common_1.BadRequestException('Only use jpg files'), false);
+            }
+        }
     })),
-    __param(0, (0, common_1.UploadedFile)()),
+    __param(0, (0, common_1.UploadedFile)(new common_1.ParseFilePipe({
+        validators: [
+            new common_1.FileTypeValidator({ fileType: 'jpg' }),
+        ],
+    }))),
     __param(1, (0, common_1.Body)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Number]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updateAvatar", null);
+__decorate([
+    (0, common_1.Post)('generate'),
+    __param(0, (0, common_1.Body)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "generate2FA", null);
+__decorate([
+    (0, common_1.Post)('verify'),
+    __param(0, (0, common_1.Body)('id')),
+    __param(1, (0, common_1.Body)('token')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "verify2fa", null);
+__decorate([
+    (0, common_1.Post)('change-factor'),
+    __param(0, (0, common_1.Body)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "changeFactor", null);
 UserController = __decorate([
     (0, common_1.Controller)('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])

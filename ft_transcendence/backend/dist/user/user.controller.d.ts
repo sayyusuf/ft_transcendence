@@ -11,4 +11,7 @@ export declare class UserController {
         nick: string;
     }>;
     updateAvatar(file: Express.Multer.File, id: number): Promise<import(".prisma/client").User>;
+    generate2FA(id: any): Promise<any>;
+    verify2fa(id: any, token: any): Promise<any>;
+    changeFactor(id: any): Promise<import(".prisma/client").User>;
 }

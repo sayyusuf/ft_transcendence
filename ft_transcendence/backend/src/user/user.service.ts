@@ -4,11 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom, lastValueFrom, map } from 'rxjs';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChangeNickDto } from './dto/changenick.dto';
+import * as speakeasy from "speakeasy";
+import * as qrcode from "qrcode";
 
 @Injectable()
 export class UserService {
 	constructor(private context:PrismaService,private config:ConfigService, private readonly httpService: HttpService){}
-	
+
 	async getToken(code:string)
 	{
 		try {
@@ -121,6 +123,7 @@ export class UserService {
 					name: userData.first_name,
 					surname: userData.last_name,
 					login: userData.login,
+					two_factor_enabled: false,
 					status:0,
 					win:0,
 					lose:0,
@@ -143,7 +146,7 @@ export class UserService {
 			const userExist = await this.getUserByLogin(userData.login)
 			let retUser
 			if (!userExist){
-				retUser = Object(this.addNewUser(userData))
+				retUser = Object(await this.addNewUser(userData))
 				retUser.coalition_img = userData.coalition_img
 				retUser.coalition_color = userData.coalition_color
 				return retUser
@@ -197,4 +200,61 @@ export class UserService {
 		})
 		return updatedUser
 	}
+
+	async changeFactor(id){
+		const userExist = await this.getUserById(Number(id))
+		if (!userExist)
+			throw new HttpException('User not found', HttpStatus.FORBIDDEN)
+		const updatedUser = await this.context.user.update({
+			where:{
+				id: Number(id),
+			},
+			data:{
+				two_factor_enabled: !userExist.two_factor_enabled
+			}
+		})
+		return updatedUser
+	}
+
+	async generateSecretAndQRCode(id){
+		const user = await this.getUserById(Number(id))
+		if (!user)
+			throw new HttpException('User not exist', HttpStatus.FORBIDDEN)
+		const secret = speakeasy.generateSecret({
+			name: 'ft_transcendence'
+		})
+		await this.context.user.update({
+			where:{
+				id: id
+			},
+			data:{
+				two_factor_secret: secret.ascii
+			}
+		})
+		let qrData = null
+		const generateQR = async text => {
+			try {
+				return await qrcode.toDataURL(text);
+			} 
+			catch (err) {
+				throw new HttpException('Error occured', HttpStatus.FORBIDDEN)
+			}
+		}
+		qrData = await generateQR(secret.otpauth_url)
+		return qrData
+	}
+
+	async verify2fa(id, token){
+		const user = await this.getUserById(Number(id))
+		if (!user)
+			throw new HttpException('User not exist', HttpStatus.FORBIDDEN)
+		const verified = speakeasy.totp.verify({
+				secret: user.two_factor_secret,
+				encoding: 'ascii',
+				token: token
+			})
+		return verified
+	}
+
+
 }

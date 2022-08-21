@@ -18,4 +18,7 @@ export declare class UserService {
         nick: string;
     }>;
     changeAvatar(id: any): Promise<import(".prisma/client").User>;
+    changeFactor(id: any): Promise<import(".prisma/client").User>;
+    generateSecretAndQRCode(id: any): Promise<any>;
+    verify2fa(id: any, token: any): Promise<any>;
 }

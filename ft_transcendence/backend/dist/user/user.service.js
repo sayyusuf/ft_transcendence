@@ -15,6 +15,8 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const rxjs_1 = require("rxjs");
 const prisma_service_1 = require("../prisma/prisma.service");
+const speakeasy = require("speakeasy");
+const qrcode = require("qrcode");
 let UserService = class UserService {
     constructor(context, config, httpService) {
         this.context = context;
@@ -112,6 +114,7 @@ let UserService = class UserService {
                     name: userData.first_name,
                     surname: userData.last_name,
                     login: userData.login,
+                    two_factor_enabled: false,
                     status: 0,
                     win: 0,
                     lose: 0,
@@ -132,7 +135,7 @@ let UserService = class UserService {
             const userExist = await this.getUserByLogin(userData.login);
             let retUser;
             if (!userExist) {
-                retUser = Object(this.addNewUser(userData));
+                retUser = Object(await this.addNewUser(userData));
                 retUser.coalition_img = userData.coalition_img;
                 retUser.coalition_color = userData.coalition_color;
                 return retUser;
@@ -181,6 +184,58 @@ let UserService = class UserService {
             }
         });
         return updatedUser;
+    }
+    async changeFactor(id) {
+        const userExist = await this.getUserById(Number(id));
+        if (!userExist)
+            throw new common_1.HttpException('User not found', common_1.HttpStatus.FORBIDDEN);
+        const updatedUser = await this.context.user.update({
+            where: {
+                id: Number(id),
+            },
+            data: {
+                two_factor_enabled: !userExist.two_factor_enabled
+            }
+        });
+        return updatedUser;
+    }
+    async generateSecretAndQRCode(id) {
+        const user = await this.getUserById(Number(id));
+        if (!user)
+            throw new common_1.HttpException('User not exist', common_1.HttpStatus.FORBIDDEN);
+        const secret = speakeasy.generateSecret({
+            name: 'ft_transcendence'
+        });
+        await this.context.user.update({
+            where: {
+                id: id
+            },
+            data: {
+                two_factor_secret: secret.ascii
+            }
+        });
+        let qrData = null;
+        const generateQR = async (text) => {
+            try {
+                return await qrcode.toDataURL(text);
+            }
+            catch (err) {
+                throw new common_1.HttpException('Error occured', common_1.HttpStatus.FORBIDDEN);
+            }
+        };
+        qrData = await generateQR(secret.otpauth_url);
+        return qrData;
+    }
+    async verify2fa(id, token) {
+        const user = await this.getUserById(Number(id));
+        if (!user)
+            throw new common_1.HttpException('User not exist', common_1.HttpStatus.FORBIDDEN);
+        const verified = speakeasy.totp.verify({
+            secret: user.two_factor_secret,
+            encoding: 'ascii',
+            token: token
+        });
+        return verified;
     }
 };
 UserService = __decorate([
