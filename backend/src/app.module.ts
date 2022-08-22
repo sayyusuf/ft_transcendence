@@ -5,12 +5,13 @@ import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
-
+import { EventsModule } from 'events/events.module';
 
 @Module({
   imports: [
     UserModule,
-    PrismaModule, 
+    PrismaModule,
+    EventsModule,
     ConfigModule.forRoot({
     isGlobal:true
     }),
