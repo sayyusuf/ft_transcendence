@@ -1,4 +1,5 @@
 version: '3.3'
+
 services:
   transdb:
     image: postgres:13
@@ -21,4 +22,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/ermand/devdb
+      device: /home/unicorn/devdb
