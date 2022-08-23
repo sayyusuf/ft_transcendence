@@ -8,6 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import Authorize from "./pages/Authorize";
 import Settings from "./pages/Settings";
 import Friends from './pages/Friends'
+import Game from './pages/Game'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
               <Route path="profile" element={<PrivateRoute> <Profile/> </PrivateRoute>} />
               <Route path="settings" element={<PrivateRoute> <Settings/> </PrivateRoute>} />
               <Route path="friends" element={<PrivateRoute> <Friends/> </PrivateRoute>} />
+              <Route path="game" element={<PrivateRoute> <Game/> </PrivateRoute>} />
         </Route>      
         <Route path="/login" element={<Login/>} />
         <Route path="/auth" element={<Authorize/>} />

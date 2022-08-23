@@ -7,7 +7,7 @@ const Dashboard = () => {
 	return (
 		<>
 			<h1>Welcome to the PONGAME {user.name} {user.surname}</h1>
-		</>	
+		</>
 	)
 }
 

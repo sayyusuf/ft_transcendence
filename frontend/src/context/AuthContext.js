@@ -11,7 +11,6 @@ export const AuthProvider = ({ children }) => {
 		user,
 		setUser,
 		socket,
-
 	}
 	localStorage.setItem('user', JSON.stringify(user))
 

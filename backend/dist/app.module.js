@@ -14,6 +14,7 @@ const config_1 = require("@nestjs/config");
 const serve_static_1 = require("@nestjs/serve-static");
 const path_1 = require("path");
 const events_module_1 = require("./events/events.module");
+const game_module_1 = require("./game/game.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -22,6 +23,7 @@ AppModule = __decorate([
             user_module_1.UserModule,
             prisma_module_1.PrismaModule,
             events_module_1.EventsModule,
+            game_module_1.GameModule,
             config_1.ConfigModule.forRoot({
                 isGlobal: true
             }),

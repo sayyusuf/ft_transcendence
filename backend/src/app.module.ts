@@ -6,6 +6,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
 import { EventsModule } from './events/events.module';
+import { GameModule } from './game/game.module';
 
 
 @Module({
@@ -13,6 +14,7 @@ import { EventsModule } from './events/events.module';
     UserModule,
     PrismaModule,
     EventsModule,
+    GameModule,
     ConfigModule.forRoot({
     isGlobal:true
     }),
