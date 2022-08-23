@@ -1,11 +1,11 @@
-version: '3.3'
+version: "3.3"
 
 services:
-  transdb:
+  db:
     image: postgres:13
     container_name: db
     ports:
-      - 5436:5432
+      - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123
@@ -20,24 +20,24 @@ services:
     build: ./backend
     container_name: backend
     ports:
-        - 3334:3334
+      - 3334:3334
+      - 5555:5555
     networks:
-        - transnet
+      - transnet
     depends_on:
-        - transdb
+      - db
 
   frontend:
     image: frontend
     build: ./frontend
     container_name: frontend
     ports:
-        - 3000:3000
-        - 5555:3000
+      - 3000:3000
     networks:
-        - transnet
+      - transnet
     depends_on:
-        - transdb
-        - backend
+      - db
+      - backend
 
 networks:
   transnet:
