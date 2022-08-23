@@ -8,4 +8,4 @@ RUN npm i
 
 EXPOSE 3334
 
-CMD ["npm", "run", "start"]
+CMD ["sh", "migrate.sh"]
