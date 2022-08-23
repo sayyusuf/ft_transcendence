@@ -3,6 +3,7 @@ version: '3.3'
 services:
   transdb:
     image: postgres:13
+    container_name: db
     ports:
       - 5436:5432
     environment:
@@ -15,6 +16,7 @@ services:
       - trdb:/var/lib/postgresql/data
 
   backend:
+    image: backend
     build: ./backend
     container_name: backend
     ports:
@@ -25,10 +27,12 @@ services:
         - transdb
 
   frontend:
+    image: frontend
     build: ./frontend
     container_name: frontend
     ports:
         - 3000:3000
+        - 5555:3000
     networks:
         - transnet
     depends_on:
