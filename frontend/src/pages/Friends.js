@@ -2,31 +2,92 @@ import { Row, Button, Card, Col, Modal, Form, ListGroup, ListGroupItem } from "r
 import { useEffect, useState } from 'react'
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import '../css/chat.css'
+import { io } from 'socket.io-client';
+
+const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr }) => {
+	
+	const [msg, setMsg] = useState('')
+	const {user, socket} = useAuth()
+
+
+   	const filterMessage = msgArr.filter((msg) => msg.sender === activeChatUser || (msg.sender === user.id &&  msg.target === activeChatUser));
+
+	const handleBtn = () => {
+		const pack  = {sender : user.id , target : activeChatUser, data : msg}
+		
+		setMsgArr([...msgArr, pack])
+		setMsg('')
+		socket.emit('PRIV', JSON.stringify(pack))
+	}
+
+	return (
+		<>
+			<div id="chat-box" style={{
+				height:'100%'
+			}}>
+				<div id="chat-div" style={{
+					display:'flex',
+					flexDirection:'column',
+					justifyContent:"space-between",
+					height:'100%'
+				}}>
+					<div>
+						<ul id="messages">
+							{filterMessage.map((msg, index) => (
+								<li key={index}>{msg.data}</li>
+							))}
+						</ul>
+					</div>
+					<div>
+						<Row>
+							<Col className="col-8">
+								<Form.Control onChange={(e) => setMsg(e.target.value)} value={msg} id="msg-input" autoComplete="off" />
+							</Col>
+							<Col className="col-4">
+								<Button variant="primary" onClick={handleBtn}  id="submit-btn">Send</Button>
+								<Button style={{marginLeft: '5px'}} variant="danger" onClick={() => setActiveChat(false)}>x</Button>
+							</Col>
+						</Row>
+							
+					</div>
+				</div>
+			</div>
+		</>
+
+
+	)
+}
+
 
 const Friends = () => {
 	const [show, setShow] = useState(false);
 	const [addNick, setNick] = useState('')
-	const { user, setAuth } = useAuth()
+	const { user, socket} = useAuth()
+	const [msgArr, setMsgArr] = useState([])
 	const [friendArray, setFriendArray] = useState([])
+	const [activeChat, setActiveChat] = useState(false)
+	const [activeChatUser, setActiveChatUser] = useState(false)
 	const [blockArray, setBlockArray] = useState([])
 	const [refresh, setRefresh] = useState(false)
+	const [showChat, setShowChat] = useState(false)
 
-  	const handleClose = () => setShow(false);
-  	const handleShow = () => setShow(true);
+	const handleClose = () => setShow(false);
+	const handleShow = () => setShow(true);
+	
 
 	const handleAddFriend = () => {
 		const payload = {
 			id: user.id,
 			nick: addNick
 		}
-
 		axios.post(`${process.env.REACT_APP_API_URL}/user/add-friend`, payload)
-		.then((response) => {
-			alert(`${response.data.nick} added as a friend`)
-		})
-		.catch(() => {
-			alert(`User with nickname: ${addNick} is not found`)
-		})
+			.then((response) => {
+				alert(`${response.data.nick} added as a friend`)
+			})
+			.catch(() => {
+				alert(`User with nickname: ${addNick} is not found`)
+			})
 	}
 
 	const handleBlock = (nick) => {
@@ -36,12 +97,12 @@ const Friends = () => {
 		}
 
 		axios.post(`${process.env.REACT_APP_API_URL}/user/block-friend`, payload)
-		.then((response) => {
-			alert(`${response.data.nick} blocked`)
-		})
-		.catch(() => {
-			alert(`User with nickname: ${addNick} couldnt be blocked`)
-		})
+			.then((response) => {
+				alert(`${response.data.nick} blocked`)
+			})
+			.catch(() => {
+				alert(`User with nickname: ${addNick} couldnt be blocked`)
+			})
 	}
 
 	const handleRemoveBlock = (nick) => {
@@ -50,12 +111,12 @@ const Friends = () => {
 			nick: nick
 		}
 		axios.post(`${process.env.REACT_APP_API_URL}/user/remove-block`, payload)
-		.then((response) => {
-			alert(`${response.data.nick} is unblocked`)
-		})
-		.catch(() => {
-			alert(`User with nickname: ${addNick}  couldnt be unblocked`)
-		})
+			.then((response) => {
+				alert(`${response.data.nick} is unblocked`)
+			})
+			.catch(() => {
+				alert(`User with nickname: ${addNick}  couldnt be unblocked`)
+			})
 	}
 
 	useEffect(() => {
@@ -63,85 +124,108 @@ const Friends = () => {
 			id: user.id
 		}
 		axios.post(`${process.env.REACT_APP_API_URL}/user/get-friends`, payload)
-		.then(res => {
-			const friends = res.data
-			setFriendArray(friends)
-		})
-		.catch(() => console.log('error'))
+			.then(res => {
+				const friends = res.data
+				setFriendArray(friends)
+			})
+			.catch(() => console.log('error'))
 
 		axios.post(`${process.env.REACT_APP_API_URL}/user/get-blocks`, payload)
-		.then(res => {
-			const blocks = res.data
-			setBlockArray(blocks)
-		})
-		.catch(() => console.log('error'))
-	}, [friendArray, blockArray, refresh])
-
-	
-	
+			.then(res => {
+				const blocks = res.data
+				setBlockArray(blocks)
+			})
+			.catch(() => console.log('error'))
+			socket.addEventListener(user.id, (data) => {
+				const parsed = JSON.parse(data)
+				setMsgArr([...msgArr, parsed])
+				
+			})
+	}, [msgArr])
 
 	return (
 		<>
+			<Button variant="primary" className="mb-2" onClick={handleShow}>Add Friend</Button>
+			<Row style={{height: '70vh'}}>
+				{activeChat ? (
+					<Col md={4} >
+					<Card style={{height:'100%'}}>
+						<Card.Body>
+							<Chat msgArr={msgArr} setMsgArr={setMsgArr} setActiveChat={setActiveChat} activeChatUser={activeChatUser} />
+						</Card.Body>
+					</Card>
+				</Col>
+				) : ''}
+				
+				<Col className={activeChat ? `md="4"` : `md="6"`} >
+					<Card>
+						<Card.Title>
+							<h3 className="text-center">Friends</h3>
+							<hr />
+						</Card.Title>
+						<Card.Body className="mt-0">
+							<ListGroup>
+								{friendArray.map((friend, index) => (
+									<ListGroupItem key={index}>
+										<div className="d-flex justify-content-between">
+											<div>
+												{friend.nick}
+											</div>
+											<div>
+												<Button onClick={() => {
+													console.log(friend.id)
+													setActiveChatUser(friend.id)
+													console.log(activeChatUser)
+													setActiveChat(true)
+												}}  variant="success">Chat</Button>
+												<Button style={{ marginLeft: '8px' }} onClick={() => handleBlock(friend.nick)} variant="danger">Block</Button>
+											</div>
 
-		<Button variant="primary" className="mb-2" onClick={handleShow}>Add Friend</Button>
-		<Row>
-			<Col md={6}>
-				<Card>
-					<Card.Title>
-						<h3 className="text-center">Friends</h3>
-						<hr />
-					</Card.Title>
-					<Card.Body className="mt-0">
-						<ListGroup>
-						{friendArray.map((friend, index) => (
-							<ListGroupItem>
-								<div className="d-flex justify-content-between">
-									<div>
-									{friend.name} {friend.surname} - {friend.nick}
-									</div>
-									<Button onClick={() => handleBlock(friend.nick)} variant="danger">Block</Button>
-								</div>						
-							</ListGroupItem>
-						))}
-						</ListGroup>
-
-					
-					</Card.Body>
-				</Card>
-			</Col>
-			<Col md={6}>
-				<Card>
-					<Card.Title>
-						<h3 className="text-center">Blocked Users</h3>
-						<hr />
-					</Card.Title>
-					<Card.Body>
-						<ListGroup>
-							{blockArray.map((block, index) => (
-								<ListGroupItem>
-									<div className="d-flex justify-content-between">
-										<div>
-										{block.name} {block.surname} - {block.nick}
 										</div>
-										<Button onClick={() => handleRemoveBlock(block.nick)} variant="success">Unblock</Button>
-									</div>	
-								</ListGroupItem>
-							))}
+									</ListGroupItem>
+								))}
 							</ListGroup>
-					</Card.Body>
-				</Card>
-			</Col>
-		</Row>
 
-		<Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add Friend</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-			<Form.Control onChange={(e) => setNick(e.target.value)} type="text"></Form.Control>
-			<Button onClick={handleAddFriend} className="mt-2" variant="success">Add</Button>
-		</Modal.Body>
-      </Modal>
+
+						</Card.Body>
+					</Card>
+				</Col>
+				<Col className={activeChat ? `md="4"` : `md="6"`}>
+					<Card>
+						<Card.Title>
+							<h3 className="text-center">Blocked Users</h3>
+							<hr />
+						</Card.Title>
+						<Card.Body>
+							<ListGroup>
+								{blockArray.map((block, index) => (
+									<ListGroupItem key={index}>
+										<div className={"d-flex justify-content-between"}>
+											<div>
+												{block.name} {block.surname} - {block.nick}
+											</div>
+											<Button onClick={() => handleRemoveBlock(block.nick)} variant="success">Unblock</Button>
+										</div>
+									</ListGroupItem>
+								))}
+							</ListGroup>
+						</Card.Body>
+					</Card>
+				</Col>
+			</Row>
+
+			<Modal show={show} onHide={handleClose}>
+				<Modal.Header closeButton>
+					<Modal.Title>Add Friend</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<Form.Control onChange={(e) => setNick(e.target.value)} type="text"></Form.Control>
+					<Button onClick={handleAddFriend} className="mt-2" variant="success">Add</Button>
+				</Modal.Body>
+			</Modal>
+
+			
+
 		</>
 	)
 }

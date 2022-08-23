@@ -9,7 +9,7 @@ export declare class UserService {
     constructor(context: PrismaService, config: ConfigService, httpService: HttpService);
     getToken(code: string): Promise<any>;
     getIntraUser(accessObject: any): Promise<any>;
-    getUserById(id: any): import(".prisma/client").Prisma.Prisma__UserClient<import(".prisma/client").User>;
+    getUserById(id: any): Promise<import(".prisma/client").User>;
     getUserByLogin(login: string): Promise<import(".prisma/client").User>;
     getUserByNick(nick: string): Promise<import(".prisma/client").User>;
     addNewUser(userData: any): any;

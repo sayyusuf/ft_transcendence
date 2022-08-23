@@ -59,10 +59,10 @@ export class UserService {
 		}
 	}
 
-	getUserById(id){
+	async getUserById(id){
 		try
 		{
-			const userExist = this.context.user.findUnique({
+			const userExist = await this.context.user.findUnique({
 				where: {
 					id: id
 				}

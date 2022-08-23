@@ -33,6 +33,7 @@ model User {
   blockedBy Int[]
 }
 
+
 model MatchHistory{
   id Int      @id @default(autoincrement())
   user1 Int

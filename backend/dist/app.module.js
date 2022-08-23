@@ -13,6 +13,7 @@ const prisma_module_1 = require("./prisma/prisma.module");
 const config_1 = require("@nestjs/config");
 const serve_static_1 = require("@nestjs/serve-static");
 const path_1 = require("path");
+const events_module_1 = require("./events/events.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -20,6 +21,7 @@ AppModule = __decorate([
         imports: [
             user_module_1.UserModule,
             prisma_module_1.PrismaModule,
+            events_module_1.EventsModule,
             config_1.ConfigModule.forRoot({
                 isGlobal: true
             }),

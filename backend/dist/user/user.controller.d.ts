@@ -6,7 +6,7 @@ export declare class UserController {
     constructor(userService: UserService);
     authUser(code: string): Promise<any>;
     getUserByNick(nickname: any): Promise<import(".prisma/client").User>;
-    getUserById(id: any): import(".prisma/client").Prisma.Prisma__UserClient<import(".prisma/client").User>;
+    getUserById(id: any): Promise<import(".prisma/client").User>;
     updateNickanme(changeNickDto: ChangeNickDto): Promise<{
         nick: string;
     }>;

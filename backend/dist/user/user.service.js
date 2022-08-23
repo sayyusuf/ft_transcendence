@@ -59,9 +59,9 @@ let UserService = class UserService {
             throw new common_1.HttpException('Error occured', common_1.HttpStatus.FORBIDDEN);
         }
     }
-    getUserById(id) {
+    async getUserById(id) {
         try {
-            const userExist = this.context.user.findUnique({
+            const userExist = await this.context.user.findUnique({
                 where: {
                     id: id
                 }
