@@ -1,177 +1,302 @@
-import { Logger } from '@nestjs/common';
+import { ConsoleLogger, Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
-import { userInfo } from 'os';
-import { parse } from 'path/posix';
 import { Socket, Server } from 'socket.io';
 
-const dataMap = new Map();
-const playerMap = new Map();
-const playerQueue = [];
+const waiting_room = new Array();
+const matches = new Array();
+const match_info = new Array();
 
-const canvas = {
-  height : 800,
-  width : 1000
-}
 
-// when COM or USER scores, we reset the ball
-function resetBall(id : any){
-  let ball = dataMap[id].ball
-  ball.x = canvas.width/2;
-  ball.y = canvas.height/2;
-  ball.velocityX = -ball.velocityX;
-  ball.speed = 7;
-}
+  var user_id;
 
-// collision detection
-function collision(b,p){
-  p.top = p.y;
-  p.bottom = p.y + p.height;
-  p.left = p.x;
-  p.right = p.x + p.width;
-  
-  b.top = b.y - b.radius;
-  b.bottom = b.y + b.radius;
-  b.left = b.x - b.radius;
-  b.right = b.x + b.radius;
-  
-  return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
-}
+  var match_id_counter = -1;
+  var room_user_counter = 0;
 
-// update function, the function that does all calculations
-function update(id : any){
-	let ball = dataMap[id].ball;
-	let com = dataMap[id].com;
-	let user = dataMap[id].user;
-	// change the score of players, if the ball goes to the left "ball.x<0" computer win, else if "ball.x > canvas.width" the user win
-  if( ball.x - ball.radius < 0 ){
-      com.score++;
-      resetBall(id);
-  }else if( ball.x + ball.radius > canvas.width){
-      user.score++;
-      resetBall(id);
+  const canvas_width = 800;
+  const canvas_height = 600;
+
+  const ball = {
+    x : canvas_width/2,
+    y : canvas_height/2,
+    radius: 10,
   }
-  
-  // the ball has a velocity
-  ball.x += ball.velocityX;
-  ball.y += ball.velocityY;
-  
-  // when the ball collides with bottom and top walls we inverse the y velocity.
-  if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height){
-      ball.velocityY = -ball.velocityY;
+
+  const user_left = {
+    x : 0,
+    y : (canvas_height/2) - 50,
+    width : 10,
+    height : 100,
   }
-  
-  // we check if the paddle hit the user or the com paddle
-  let player = (ball.x + ball.radius < canvas.width/2) ? user : com;
-  
-  // if the ball hits a paddle
-  if(collision(ball,player)){
-      // we check where the ball hits the paddle
+
+  const user_right = {
+    x : canvas_width-10,
+    y : (canvas_height/2) - 50,
+    width : 10,
+    height : 100,
+  }
+
+
+  function reset_ball(match_id: number) {
+    match_info[match_id].ball_x = canvas_width/2;
+    match_info[match_id].ball_y = canvas_height/2;
+    match_info[match_id].user_left_y = canvas_height/2 - 5;
+    match_info[match_id].user_right_y = canvas_height/2 - 5;
+    match_info[match_id].velocity_X = 5.00;
+    match_info[match_id].velocity_Y = 5.00;
+    match_info[match_id].speed = 5;
+  }
+
+  function collision(b,p){
+    p.top = p.y;
+    p.bottom = p.y + p.height;
+    p.left = p.x;
+    p.right = p.x + p.width;
+    
+    b.top = b.y - b.radius;
+    b.bottom = b.y + b.radius;
+    b.left = b.x - b.radius;
+    b.right = b.x + b.radius;
+    
+    return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
+  }
+
+@WebSocketGateway()
+export class GameGateway {
+
+  @WebSocketServer() wss: Server;
+
+  private logger: Logger = new Logger('AppGateway');
+
+  afterInit(server: Server) {
+    this.logger.log('Initialized!')
+  }
+
+
+init_function(id: any[]) {
+  if(waiting_room.length % 2 != 0){
+    this.wss.to(id[0]).emit("status", [1,0,-1]);
+    this.lobby_send_function();
+  } else {
+      match_id_counter++;
+      console.log("new match id = " + match_id_counter);
+      this.wss.to(waiting_room[waiting_room.length-1]).emit("status", [2,0,match_id_counter]);
+      this.wss.to(waiting_room[waiting_room.length-2]).emit("status", [2,1,match_id_counter]);
+  }
+}
+
+
+
+delete_match_info(match_id, user_id) {
+  this.wss.to(user_id).emit("in_game", "died");
+  if(matches[match_id].length > 4)
+      for(var i = 4; i < matches[match_id].length; i++){
+        this.wss.to(matches[match_id][i]).emit("in_game", "stop");
+  }
+  match_info.splice(match_id, 1, {status : "died"});
+  matches.splice(match_id, 1, 0);
+  this.init_function([user_id, 1]);
+}
+
+
+handleDisconnect(client: Socket) {
+  //check disconnected user whether in waiting_room
+  for(var i = 0; i < waiting_room.length; i++){
+      if(waiting_room[i] == client.id)
+        waiting_room.splice(i, 1);
+  }
+
+  for(var i = 0; i < matches.length; i++){
+    if(matches[i][2] == client.id){
+      clearInterval(matches[i][1]);
+      waiting_room.push(matches[i][3]);
+      this.delete_match_info(matches[i][0], matches[i][3]);
+    } else if (matches[i][3] == client.id) {
+        clearInterval(matches[i][1]);
+        waiting_room.push(matches[i][2]);
+        this.delete_match_info(matches[i][0], matches[i][2]);
+    }
+  }
+  this.lobby_send_function();
+}
+
+lobby_send_function() {
+  var send_message = [];
+  for(let i = 0; i < match_info.length; i++) {
+    if(match_info[i].status != "died") {
+      send_message.push(match_info[i].match_id);
+    }
+  }
+  this.wss.emit("lobby_state", send_message);
+}
+
+win_loss_function(info) {
+    if(info[0] == "left") {
+
+      
+
+        this.wss.to(matches[info[1]][2]).emit("in_game", "won");
+        this.wss.to(matches[info[1]][3]).emit("in_game", "loss");
+        //to database won loss
+    } else {
+        this.wss.to(matches[info[1]][2]).emit("in_game", "loss");
+        this.wss.to(matches[info[1]][3]).emit("in_game", "won");
+        //to database won loss
+    }
+
+    if(matches[info[1]].length > 4)
+      for(var i = 4; i < matches[info[1]].length; i++){
+        this.wss.to(matches[info[1]][i]).emit("in_game", "stop");
+    }
+
+    match_info.splice(info[1], 1, {status : "died"});
+    this.logger.log(info[1] + ". match finished")
+    matches.splice(info[1], 1, 0);
+    this.lobby_send_function();
+
+}
+
+handleConnection(client: Socket, ...args: any[]) {
+  this.logger.log(`Client connect: ${client.id}`);
+}
+
+@SubscribeMessage('connection')
+handleNewConnectionFunction(client: Socket, data: any) {
+  //data[0] = connected/disconnection
+  if(data[0] === "connected") {
+    console.log(client.id + " connected successfully");
+    // for(let i = 0; i < waiting_room.length; i++)
+    // if(waiting_room[i][1] == data[1]){
+    //   this.wss.to(client.id).emit("status", [-1, 0,-1])
+    //   return
+    // }
+    waiting_room.push(client.id);
+    this.init_function([client.id, 0])
+  } else {
+    this.handleDisconnect(client);
+  }
+}
+
+
+game = (match_id: string, match_info_id ) => {
+  if( match_info[match_info_id].ball_x  + match_info[match_info_id].radius < 0 ){
+          match_info[match_info_id].user_right_score++;
+          if(match_info[match_info_id].user_right_score > 9) {
+              clearInterval(matches[match_info_id][1]);
+              this.win_loss_function(["right", match_info_id]);
+              return
+          } //right won
+          else
+              reset_ball(match_info_id);
+
+  }else if( match_info[match_info_id].ball_x  + match_info[match_info_id].radius > canvas_width){
+          match_info[match_info_id].user_left_score++;
+          if(match_info[match_info_id].user_left_score > 9){
+              clearInterval(matches[match_info_id][1]); 
+              this.win_loss_function(["left", match_info_id]);
+              return
+          } //left won
+          else
+              reset_ball(match_info_id);
+  }
+
+
+  match_info[match_info_id].ball_x += match_info[match_info_id].velocity_X;
+  match_info[match_info_id].ball_y += match_info[match_info_id].velocity_Y;
+
+  match_info[match_info_id].ball_x = Math.round(match_info[match_info_id].ball_x);
+  match_info[match_info_id].ball_y = Math.round(match_info[match_info_id].ball_y);
+
+//ball collision detection for up and down walls
+  if(match_info[match_info_id].ball_y + match_info[match_info_id].radius > canvas_height || match_info[match_info_id].ball_y - match_info[match_info_id].radius < 0) {
+    match_info[match_info_id].velocity_Y = -match_info[match_info_id].velocity_Y;
+  }
+
+  user_left.y = match_info[match_info_id].user_left_y;
+  user_right.y = match_info[match_info_id].user_right_y;
+  let player = (match_info[match_info_id].ball_x + match_info[match_info_id].radius < canvas_width/2) ? user_left : user_right;
+  ball.x = match_info[match_info_id].ball_x;
+  ball.y = match_info[match_info_id].ball_y;
+
+  if(collision(ball, player)) {
       let collidePoint = (ball.y - (player.y + player.height/2));
-      // normalize the value of collidePoint, we need to get numbers between -1 and 1.
-      // -player.height/2 < collide Point < player.height/2
       collidePoint = collidePoint / (player.height/2);
-      
-      // when the ball hits the top of a paddle we want the ball, to take a -45degees angle
-      // when the ball hits the center of the paddle we want the ball to take a 0degrees angle
-      // when the ball hits the bottom of the paddle we want the ball to take a 45degrees
-      // Math.PI/4 = 45degrees
       let angleRad = (Math.PI/4) * collidePoint;
+      let direction = (ball.x + match_info[match_info_id].radius < 500) ? 1 : -1;
+      match_info[match_info_id].velocity_X = direction * match_info[match_info_id].speed * Math.cos(angleRad);
+      match_info[match_info_id].velocity_Y = match_info[match_info_id].speed * Math.sin(angleRad);
+      match_info[match_info_id].speed += 0.1;
+  }
+
+  this.wss.to(match_id).emit("in_game", match_info[match_info_id]); 
+}
+
+
+@SubscribeMessage('user_move')
+userMouseMovementHandle(client: Socket, side: string): void {   //WsResponse<string>
+  if(side[0] == "left")
+    match_info[side[2]].user_left_y = side[1];
+  else if(side[0] == "right")
+    match_info[side[2]].user_right_y = side[1];
+}
+
+@SubscribeMessage('out-room')
+outRoomRequestHandler(client: Socket, match_id): void {   //WsResponse<string>
+
+    client.leave(match_id.toString());
+    waiting_room.push(client.id);
+    for (let index = 0; index < matches.length; index++)
+      if(matches[index][0] == match_id)
+        for(let j = 0; j < matches[index].length; j++)
+          if(matches[index][j] == client.id)
+            matches[index].splice(j, 1);
+    this.init_function([client.id, 1])
+
+}
+
+@SubscribeMessage('join-room')
+handleMessage(client: Socket, match_id: number) {
+      client.join(match_id.toString()); 
+      var flag = 1;
+      for (let index = 0; index < matches.length; index++) {
+          if(matches[index][0] == match_id) {
+            flag = 0;
+
+            for(var i = 0; i < waiting_room.length; i++){
+                if(waiting_room[i] == client.id)
+                waiting_room.splice(i, 1);
+            }
+
+            matches[index].push(client.id);
+          }
+      }
       
-      // change the X and Y velocity direction
-      let direction = (ball.x + ball.radius < canvas.width/2) ? 1 : -1;
-      ball.velocityX = direction * ball.speed * Math.cos(angleRad);
-      ball.velocityY = ball.speed * Math.sin(angleRad);
-      
-      // speed up the ball everytime a paddle hits it.
-      ball.speed += 0.1;
-    }
-  }
-  
-  @WebSocketGateway()
-  export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-    
-    @WebSocketServer() wss: Server;
-		
-    private logger: Logger = new Logger('AppGateway');
-    
-    afterInit(server: Server) {
-		console.log('Initialized!')
-    }
+      if(flag) {
+      room_user_counter ++;
+      if(room_user_counter == 2) {
+        
+      match_info.splice(match_id_counter, 0, {
+          match_id : match_id_counter,
+          status: "live",
+          ball_x: 500,
+          ball_y: 400,
+          radius: 10,
+          speed: 5,
+          velocity_X: 5.00,
+          velocity_Y: 5.00,
+          user_left_y : 200,
+          user_right_y : 200,
+          user_left_score : 0,
+          user_right_score : 0,
+      });
+          
+          
+          var intervalId = setInterval(this.game, 1000/24, match_id.toString(), match_id_counter);
 
-  handleDisconnect(client: Socket) {
-    console.log(`Client disconnect: ${client.id}`);
-  }
-  
-
-  handleConnection(client: Socket, ...args: any[]) {
-    console.log(`Client connect: ${client.id}`);
-  }
-
-  @SubscribeMessage('msgToServer')
-  handleMessage(client: Socket, data): void {   //WsResponse<string>
-	const parsedData = JSON.parse(data)
-	if (dataMap[parsedData.id] != undefined)
-		dataMap[parsedData.id].user.y = parsedData.pos;
-  }
-
-  @SubscribeMessage('onStart')
-  initUser(client: Socket, data): void {   //WsResponse<string>
-	const parsedData = JSON.parse(data)
-	dataMap[parsedData.id] = {
-		user : {
-			x : 0, // left side of canvas
-			y : (canvas.height - 100)/2, // -100 the height of paddle
-			width : 10,
-			height : 100,
-			score : 0,
-			color : "WHITE"
-		},
-		com : {
-			x : canvas.width - 10, // - width of paddle
-			y : (canvas.height - 100)/2, // -100 the height of paddle
-			width : 10,
-			height : 100,
-			score : 0,
-			color : "WHITE"
-		  },
-		net : {
-			x : (canvas.width - 2)/2,
-			y : 0,
-			height : 10,
-			width : 2,
-			color : "WHITE"
-		},
-		ball : {
-			x : canvas.width/2,
-			y : canvas.height/2,
-			radius : 10,
-			velocityX : 5,
-			velocityY : 5,
-			speed : 7,
-			color : "WHITE"
-		}
-	}
-	if (playerQueue.length != 0 && dataMap[parsedData.id] == undefined) {
-		let player1 = playerQueue[playerQueue.length - 1];
-		let player2 = parsedData.id;
-		playerMap[playerQueue.length - 1] = parsedData.id;
-		playerMap[player2] = player1;
-		dataMap[player2].user = dataMap[player1].com;
-		dataMap[player2].com = dataMap[player1].user;
-		dataMap[player2].ball = dataMap[player1].ball;
-		dataMap[player2].net = dataMap[player1].net;
-		playerQueue.pop();
-		setInterval(()=>{
-			update(player1);
-		},15);
-		setInterval(()=>{
-			this.wss.emit(player2, JSON.stringify(dataMap[player2]));
-		},15);
-		setInterval(()=>{
-			this.wss.emit(player1, JSON.stringify(dataMap[player1]));
-		},15);
-	} else {
-		playerQueue.push(parsedData.id);
-	}
+          matches.splice(match_id_counter, 0,[match_id, intervalId, waiting_room[waiting_room.length-1], waiting_room[waiting_room.length-2]]);
+          waiting_room.pop();
+          waiting_room.pop();
+          room_user_counter = 0;
+        }
+      }
   }
 }

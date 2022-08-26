@@ -62,6 +62,9 @@ let UserController = class UserController {
     async removeBlock(id, nick) {
         return await this.userService.removeBlock(Number(id), nick);
     }
+    testGet() {
+        console.log('get atildi teste');
+    }
 };
 __decorate([
     (0, common_1.Get)('auth'),
@@ -180,6 +183,12 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "removeBlock", null);
+__decorate([
+    (0, common_1.Get)('test'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "testGet", null);
 UserController = __decorate([
     (0, common_1.Controller)('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])

@@ -96,4 +96,12 @@ export class UserController {
 	async removeBlock(@Body('id') id, @Body('nick') nick){
 		return await this.userService.removeBlock(Number(id), nick)
 	}
+
+	@Get('test')
+	testGet(){
+		console.log('get atildi teste')
+	}
+
+	//@Post('')
+
 }

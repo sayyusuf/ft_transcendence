@@ -25,4 +25,5 @@ export declare class UserController {
     removeBlock(id: any, nick: any): Promise<{
         nick: any;
     }>;
+    testGet(): void;
 }

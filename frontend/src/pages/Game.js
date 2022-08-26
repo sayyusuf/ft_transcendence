@@ -1,13 +1,17 @@
 import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext"
-
-
+import {drawText, drawRect, drawCircle, welcome_page} from "../game/canvas_functions"
+import GameLogo from '../game/icons8-game-64.png'
+import {io} from 'socket.io-client'
+import axios from "axios"
 
 
 	// select canvas element
 const Canvas = () => {
+	
 	return (
 		<>
+			
 		</>
 	)
 }
@@ -15,132 +19,237 @@ const Canvas = () => {
 
 const Game = () => {
 	const { user, socket } = useAuth()
+
+	function unloadHandler(){
+		axios.get(`${process.env.REACT_APP_API_URL}/user/test`).then(() => console.log('get atildi'))
+	}
+
+
 	useEffect(() => {
 		const canvas = document.getElementById("pong");
-		const data ={
-			id:user.id
+		const c = canvas.getContext('2d');
+		
+		socket.emit('connection', ['connected', user.id])
+		if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
+			socket.off("status");
+			socket.off("lobby");
+			socket.off("in_game");
+			socket.emit('connection', ['disconnect', -1])
+			console.info( "This page is reloaded" );
 		}
-		// gameUser.y = evt.clientY - rect.top - gameUser.height/2;
-		socket.emit('onStart', JSON.stringify(data));
-		// getContext of canvas = methods and properties to draw and do a lot of thing to the canvas
-		const ctx = canvas.getContext('2d');
-	
-		// Ball object
-		let ball = {
-			x : canvas.width/2,
+		var game_Start_flag = 0;
+
+		var lobby_data_local = [];
+		var current_observerd_match_id = -1;
+
+		const gameUser = { // client gameUser bilgileri
 			y : canvas.height/2,
-			radius : 10,
-			velocityX : 5,
-			velocityY : 5,
-			speed : 7,
-			color : "WHITE"
-		}
-	
-		// gameUser Paddle
-		let gameUser = {
-			x : 0, // left side of canvas
-			y : (canvas.height - 100)/2, // -100 the height of paddle
+			user_side : "",
+			match_id : 0,
 			width : 10,
 			height : 100,
-			score : 0,
-			color : "WHITE"
+			color : 'white',
 		}
-	
-		// COM Paddle
-		let com = {
-			x : canvas.width - 10, // - width of paddle
-			y : (canvas.height - 100)/2, // -100 the height of paddle
-			width : 10,
-			height : 100,
-			score : 0,
-			color : "WHITE"
-		}
-	
-		// NET
-		let net = {
+
+		const net = {
 			x : (canvas.width - 2)/2,
 			y : 0,
 			height : 10,
 			width : 2,
-			color : "WHITE"
+			color : "white"
 		}
-	
-		// draw a rectangle, will be used to draw paddles
-		function drawRect(x, y, w, h, color){
-			ctx.fillStyle = color;
-			ctx.fillRect(x, y, w, h);
-		}
-	
-		// draw circle, will be used to draw the ball
-		function drawArc(x, y, r, color){
-			ctx.fillStyle = color;
-			ctx.beginPath();
-			ctx.arc(x,y,r,0,Math.PI*2,true);
-			ctx.closePath();
-			ctx.fill();
-		}
-	
-		// listening to the mouse
-		canvas.addEventListener("mousemove", getMousePos);
-	
-		function getMousePos(evt){
-			let rect = canvas.getBoundingClientRect();
-			const data ={
-				pos:evt.clientY - rect.top - gameUser.height/2,
-				id:user.id
+		
+		drawRect(0,0, canvas.width, canvas.height, 'white', c );
+		welcome_page(c);
+		drawText("Connected", 170, 300, 'green', c , "18px Arial");
+		//drawText(socket.id, 170, 320, 'black', c , "18px Arial");
+		drawText("Your are in the Waiting Room", 170, 340, 'black', c , "18px Arial");
+
+		const img = new Image();
+		img.src = GameLogo
+
+		const statusHandle_function = (status_id) => {
+			console.log(status_id);
+			if(status_id[0] == 1){
+				game_Start_flag = 0;
+				//c.clearRect(0, 0, canvas.width, canvas.height);
+				drawRect(0,0, canvas.width, canvas.height, 'white', c );
+				socket.on("lobby_state", show_lobby);
+				welcome_page(c);
+				drawText("Connected", 170, 300, 'green', c , "18px Arial");
+				drawText(socket.id, 170, 320, 'black', c , "18px Arial");
+				drawText("Your are in the Waiting Room", 170, 340, 'black', c , "18px Arial");
 			}
-			// gameUser.y = evt.clientY - rect.top - gameUser.height/2;
-			socket.emit('msgToServer', JSON.stringify(data));
+			else if(status_id[0] == 2) {
+				socket.off("lobby_state");
+				socket.emit("join-room", status_id[2]);
+				if(!status_id[1])
+					gameUser.user_side = "left";
+				else
+					gameUser.user_side = "right";
+				gameUser.match_id = status_id[2];
+
+				socket.off("status");
+				c.clearRect(0, 0, canvas.width, canvas.height);
+				game_Start_flag = 1; //in match mode
+				socket.on("in_game", render);
+			}
+			
 		}
-	
-		// draw the net
+
+		function check(e) {
+			if(game_Start_flag == 0) {
+				if(e.keyCode == 49) {
+					if(lobby_data_local[0] > -1) {
+						socket.off("lobby_state");
+						socket.emit("join-room", lobby_data_local[0]);
+						current_observerd_match_id = lobby_data_local[0];
+						game_Start_flag = 2; //observer mode
+						socket.off("status");
+						socket.on("in_game", render);
+					}
+				}
+
+				if(e.keyCode == 50) {
+					if(lobby_data_local[1] > -1) {
+						socket.off("lobby_state");
+						socket.emit("join-room", lobby_data_local[1]);
+						current_observerd_match_id = lobby_data_local[1];
+						game_Start_flag = 2; //observer mode
+						socket.off("status");
+						socket.on("in_game", render);
+					}
+				}
+
+				if(e.keyCode == 51) {
+					if(lobby_data_local[2] > -1) {
+						socket.off("lobby_state");
+						socket.emit("join-room", lobby_data_local[2]);
+						current_observerd_match_id = lobby_data_local[2];
+						game_Start_flag = 2; //observer mode
+						socket.off("status");
+						socket.on("in_game", render);
+					}
+				}
+			}
+			if(e.keyCode == 27 && game_Start_flag == 2) {
+				game_Start_flag = 0;
+				socket.emit("out-room", current_observerd_match_id);
+				socket.off("in_game");
+				c.clearRect(0, 0, canvas.width, canvas.height);
+				drawRect(0,0, canvas.width, canvas.height, 'white', c )
+				socket.on("status", statusHandle_function);
+			}
+			if(e.keyCode == 27 && game_Start_flag == 4) {
+				game_Start_flag = 0;
+				socket.emit("out-room", current_observerd_match_id);
+				socket.off("in_game");
+				c.clearRect(0, 0, canvas.width, canvas.height);
+				drawRect(0,0, canvas.width, canvas.height, 'white', c )
+				socket.on("status", statusHandle_function);
+			}
+				
+		}
+
+		document.addEventListener('keydown', check);
+
+		canvas.addEventListener("mousemove", getMousePos);
+
+		function getMousePos(evt){
+			if(game_Start_flag == 1) {
+				let rect = canvas.getBoundingClientRect();
+				gameUser.y = evt.clientY - rect.top - gameUser.height/2;
+				socket.emit('user_move', gameUser.user_side, gameUser.y, gameUser.match_id);
+			}
+		}
+
 		function drawNet(){
 			for(let i = 0; i <= canvas.height; i+=15){
-				drawRect(net.x, net.y + i, net.width, net.height, net.color);
+				drawRect(net.x, net.y + i, net.width, net.height, net.color, c);
 			}
 		}
-	
-		// draw text
-		function drawText(text,x,y){
-			ctx.fillStyle = "#FFF";
-			ctx.font = "75px fantasy";
-			ctx.fillText(text, x, y);
-		}
-		// render function, the function that does al the drawing
-		function render(){
-			
-			// clear the canvas
-			drawRect(0, 0, canvas.width, canvas.height, "#000");
-			
-			// draw the gameUser score to the left
-			drawText(gameUser.score,canvas.width/4,canvas.height/5);
-			
-			// draw the COM score to the right
-			drawText(com.score,3*canvas.width/4,canvas.height/5);
-			
-			// draw the net
-			drawNet();
-			
-			// draw the gameUser's paddle
-			drawRect(gameUser.x, gameUser.y, gameUser.width, gameUser.height, gameUser.color);
-			
-			// draw the COM's paddle
-			drawRect(com.x, com.y, com.width, com.height, com.color);
-			
-			// draw the ball
-			drawArc(ball.x, ball.y, ball.radius, ball.color);
-		}
-	
-		socket.addEventListener(user.id, (data) => {
-			const parsedData = JSON.parse(data)
-			ball = parsedData.ball;
-			gameUser = parsedData.user;
-			com = parsedData.com;
-			net = parsedData.net;
-			render();
-		});
-	}, [])
 
+		const render = (data) => {
+			console.log(data);
+			if(data == "died") {
+				game_Start_flag = 0;
+				socket.on("status", statusHandle_function);
+				socket.off("in_game");
+				c.clearRect(0, 0, canvas.width, canvas.height);
+				return
+			}
+			if(data == "stop") {
+				socket.off("in_game");
+				c.clearRect(0, 0, canvas.width, canvas.height);
+				drawText("Game Finished or one of gameUser disconnected!", 40, canvas.height/2, 'black', c , "30px Arial");
+				drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");
+				game_Start_flag = 4;
+				return
+			}
+			if(data == "won") {
+				socket.off("in_game");
+				c.clearRect(0, 0, canvas.width, canvas.height);
+				drawText("You Won !", 40, canvas.height/2, 'black', c , "30px Arial");
+				drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");
+				game_Start_flag = 4; //game finish;
+				return
+			}
+			if(data == "loss") {
+				socket.off("in_game");
+				c.clearRect(0, 0, canvas.width, canvas.height);
+				drawText("You Lost !", 40, canvas.height/2, 'black', c , "30px Arial");
+				drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");
+				game_Start_flag = 4; //game finish;
+				return
+			}
+			if(game_Start_flag) {
+				drawRect(0,0,canvas.width,canvas.height,"black",c);
+				// console.log(ball_colors[gameUser.ball_color]);
+				drawCircle_2(data.ball_x, data.ball_y, data.radius);
+				drawRect(0, data.user_left_y, gameUser.width, gameUser.height, gameUser.color, c);
+				drawRect(canvas.width - gameUser.width, data.user_right_y, gameUser.width, gameUser.height, gameUser.color, c);
+				drawText(data.user_left_score.toString(),canvas.width/4,canvas.height/5, 'white',c, "75px Arial");
+				drawText(data.user_right_score.toString(),3*canvas.width/4,canvas.height/5, 'white',c, "75px Arial");
+				drawNet();
+				// drawCircle(data.ball_x, data.ball_y, data.radius, ball_colors[gameUser.ball_color], c);
+				
+			}
+			
+		}
+
+		function drawCircle_2(x,y,r) {
+			// console.log(color);
+			
+			c.beginPath();
+			c.arc(x, y, 10, 0 , 2*Math.PI);
+			c.strokeStyle = "green";
+			c.stroke();
+			c.closePath();
+
+		}
+
+		const show_lobby = (lobby_data) => {
+			console.log(lobby_data);
+			drawRect(0, 430, canvas.width, canvas.height,'white',c);
+			for(var i = 0; i < lobby_data.length; i++){
+				lobby_data_local.push(lobby_data[i]);
+					c.drawImage(img, 40 + (i*80), 440);
+			}
+			// c.clearRect(0, 0, canvas.width, canvas.height);
+		}
+
+		socket.on("status", statusHandle_function);
+		window.addEventListener('unload', unloadHandler)
+		return () => {
+			console.log('component unmount')
+			socket.off("status");
+			socket.off("lobby");
+			socket.off("in_game");
+			socket.emit('connection', ['disconnect', -1])
+			axios.get(`${process.env.REACT_APP_API_URL}/user/test`).then(() => console.log('get atildi'))
+			window.removeEventListener('unload', unloadHandler)
+		}
+	}, [])
 	return (
 		<canvas style={{
 			border: `2px solid #FFF`,
@@ -150,7 +259,7 @@ const Game = () => {
             right:`0`,
             left:`0`,
             bottom:`0`
-		}} id="pong" width="1000" height="800">
+		}} id="pong" width="800" height="600">
 			<Canvas />
 		</canvas>
 	)
