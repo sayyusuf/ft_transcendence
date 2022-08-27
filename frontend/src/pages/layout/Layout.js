@@ -28,6 +28,7 @@ const Layout = () => {
 					<NavLink to={`/profile/${user.id}`} className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Profile</NavLink>
 					<NavLink to="/settings" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Settings</NavLink>
 					<NavLink to="/friends" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Friends</NavLink>
+					<NavLink to="/channels" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Channels</NavLink>
 					<NavLink to="/game" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Play</NavLink>
 					
 					<a style={{cursor: "pointer"}} onClick={handleLogout} className="nav-link">Log Out</a>

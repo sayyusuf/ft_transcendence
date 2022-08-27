@@ -17,30 +17,8 @@ import { map } from 'rxjs/operators';
 import { Server } from 'socket.io';
 import { ChannelService } from './channel.service';
 
-/*
-    {
-      user_id : number,
-      user_nick: string,
-      is_owner: boolean,
-      is_banned: boolean,
-      is_muted: boolean,
-      begin_time: number,
-      end_time: number
-    }
-  */
-/*
-    {
-      channel_name : string
-      chanel_id: number
-      user: any[];
-      cnahel_status : string => priviet, public, protected 
-      password: string,
-      owner : number[]
-    }
-  
-  */
 
-const channels: any[] = [];
+const channels = [];
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class EventsGateway
@@ -67,7 +45,7 @@ export class EventsGateway
   }
   async isOnChannel(channel_name: string): Promise<boolean> {
     for (let i = 0; i < channels.length; i++) {
-      if (channel_name === channels[i].getChannelName()) return true;
+      if (channel_name === await channels[i].getChannelName()) return true;
     }
     return false;
   }
@@ -84,8 +62,9 @@ export class EventsGateway
   @SubscribeMessage('CHAN')
   async handleChannel(client: any, data: any): Promise<any> {
     let com = JSON.parse(data);
-
-    if (this.isOnChannel(com.channel_name)) {
+    const check = await this.isOnChannel(com.channel_name)
+    console.log(check)
+    if (check) {
       //client.emit() // hata
       return false; // emit yapilacak
     } else {
@@ -109,10 +88,32 @@ export class EventsGateway
           owners: [com.user_id],
         }),
       );
-      //client.emit() // chan_id
+      await this.handleGetAll(client, data)
       return true;
     }
   }
+
+  @SubscribeMessage('GET_ALL')
+  async handleGetAll(client: any, data: any) {
+    let com = JSON.parse(data);
+    console.log(com)
+    const my = []
+    const all = []
+
+    for (let i = 0; i < channels.length; i++) {
+      const check = await channels[i].isInChannel(com.user_id)
+      console.log('check ', check)
+      if (check)
+        my.push(await channels[i].getChannelName())
+    }
+    for (let index = 0; index < channels.length; index++) {
+      all.push(await channels[index].getChannelName())
+    }
+    console.log(my)
+    console.log(all)
+    client.emit('GET_ALL', JSON.stringify({ my_channels:my, all_channels: all }))
+  }
+  
 
   @SubscribeMessage('ONLINE')
   async handleOnline(client: any, data: any) {

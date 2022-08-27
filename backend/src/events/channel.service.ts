@@ -162,21 +162,23 @@ export class ChannelService {
   }
 
   async isInChannel(user_id: number): Promise<boolean> {
-    for (let i: number; i < this.data.users.length; i++) {
-      if (user_id === this.data.users[i].user_id) return true;
+    console.log('this.users ===== ', this.data.users)
+    for (let i: number = 0; i < this.data.users.length; i++) {
+      if (user_id === this.data.users[i].user_id) 
+        return true;
     }
     return false;
   }
 
   async isOwner(user_id: number): Promise<boolean> {
-    for (let i: number; i < this.data.owners.length; i++) {
+    for (let i : number = 0; i < this.data.owners.length; i++) {
       if (user_id === this.data.owners[i]) return true;
     }
     return false;
   }
 
   async isBanned(user_id: number): Promise<boolean> {
-    for (let i: number; i < this.data.banned_users.length; i++) {
+    for (let i: number = 0; i < this.data.banned_users.length; i++) {
       if (user_id === this.data.banned_users[i]) return true;
     }
     return false;
