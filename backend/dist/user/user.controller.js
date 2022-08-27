@@ -29,8 +29,8 @@ let UserController = class UserController {
     getUserByNick(nickname) {
         return this.userService.getUserByNick(nickname);
     }
-    getUserById(id) {
-        return this.userService.getUserById(parseInt(id));
+    async getUserById(id) {
+        return await this.userService.getUserById(parseInt(id));
     }
     async updateNickanme(changeNickDto) {
         return await this.userService.changeNickName(changeNickDto);
@@ -62,8 +62,11 @@ let UserController = class UserController {
     async removeBlock(id, nick) {
         return await this.userService.removeBlock(Number(id), nick);
     }
-    testGet() {
-        console.log('get atildi teste');
+    async getMatchesById(id) {
+        return await this.userService.getMatchesById(Number(id));
+    }
+    async changeUserStatus(id, status) {
+        return await this.userService.changeStatusById(Number(id), Number(status));
     }
 };
 __decorate([
@@ -85,7 +88,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UserController.prototype, "getUserById", null);
 __decorate([
     (0, common_1.Post)('change-nickname'),
@@ -184,11 +187,20 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "removeBlock", null);
 __decorate([
-    (0, common_1.Get)('test'),
+    (0, common_1.Get)('get-matches/:id'),
+    __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "testGet", null);
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getMatchesById", null);
+__decorate([
+    (0, common_1.Post)('set-status'),
+    __param(0, (0, common_1.Body)('id')),
+    __param(1, (0, common_1.Body)('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "changeUserStatus", null);
 UserController = __decorate([
     (0, common_1.Controller)('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])

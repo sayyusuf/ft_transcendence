@@ -25,5 +25,6 @@ export declare class UserController {
     removeBlock(id: any, nick: any): Promise<{
         nick: any;
     }>;
-    testGet(): void;
+    getMatchesById(id: any): Promise<any[]>;
+    changeUserStatus(id: any, status: any): Promise<import(".prisma/client").User>;
 }

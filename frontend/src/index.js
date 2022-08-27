@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import {BrowserRouter} from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext';
+import handleGlobalUnload from './unload'
+
+window.onunload = handleGlobalUnload
+
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

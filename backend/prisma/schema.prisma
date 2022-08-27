@@ -23,7 +23,7 @@ model User {
 
   win Int
   lose Int
-  level  Int
+  level  Float
 
   two_factor_enabled Boolean
   two_factor_secret String?

@@ -1,13 +1,17 @@
+import { User } from '.prisma/client';
 import { ConsoleLogger, Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
+import { userInfo } from 'os';
 import { Socket, Server } from 'socket.io';
+import { PrismaService } from 'src/prisma/prisma.service';
+
 
 const waiting_room = new Array();
 const matches = new Array();
 const match_info = new Array();
+const db = new PrismaService()
 
-
-  var user_id;
+  const  client_array = new Array();
 
   var match_id_counter = -1;
   var room_user_counter = 0;
@@ -78,7 +82,6 @@ init_function(id: any[]) {
     this.lobby_send_function();
   } else {
       match_id_counter++;
-      console.log("new match id = " + match_id_counter);
       this.wss.to(waiting_room[waiting_room.length-1]).emit("status", [2,0,match_id_counter]);
       this.wss.to(waiting_room[waiting_room.length-2]).emit("status", [2,1,match_id_counter]);
   }
@@ -99,13 +102,24 @@ delete_match_info(match_id, user_id) {
 
 
 handleDisconnect(client: Socket) {
-  //check disconnected user whether in waiting_room
-  for(var i = 0; i < waiting_room.length; i++){
+   for(let i = 0; i < waiting_room.length; i++){
       if(waiting_room[i] == client.id)
         waiting_room.splice(i, 1);
   }
-
-  for(var i = 0; i < matches.length; i++){
+  
+  for(let j = 0; j < client_array.length; j++){
+      if(client_array[j].client_id == client.id){
+        if(client_array[j].user_count == 1) {
+          client_array.splice(j, 1);
+        }
+        else {
+          client_array[j].user_count--;
+        }
+      }
+  }
+     
+      
+  for(let i = 0; i < matches.length; i++){
     if(matches[i][2] == client.id){
       clearInterval(matches[i][1]);
       waiting_room.push(matches[i][3]);
@@ -130,29 +144,96 @@ lobby_send_function() {
 }
 
 win_loss_function(info) {
+    let loser_data = null
+    let winner_data = null
     if(info[0] == "left") {
-
-      
-
-        this.wss.to(matches[info[1]][2]).emit("in_game", "won");
-        this.wss.to(matches[info[1]][3]).emit("in_game", "loss");
+      this.wss.to(matches[info[1]][2]).emit("in_game", "won");
+      this.wss.to(matches[info[1]][3]).emit("in_game", "loss");
+        for (let i = 0; i < client_array.length; i++) {
+          if(client_array[i].client_id == matches[info[1]][3]){
+            loser_data = {
+               loser_id: client_array[i].user_id,
+               loser_score: match_info[info[1]].user_right_score
+           }
+          }
+          if(client_array[i].client_id == matches[info[1]][2]) {
+            winner_data = {
+              winner_id: client_array[i].user_id,
+              winner_score: match_info[info[1]].user_left_score
+            }
+            console.log(winner_data.winner_id)
+          }     
+        }
         //to database won loss
-    } else {
+      } else {
         this.wss.to(matches[info[1]][2]).emit("in_game", "loss");
         this.wss.to(matches[info[1]][3]).emit("in_game", "won");
+        for (let i = 0; i < client_array.length; i++) {
+          if(client_array[i].client_id == matches[info[1]][2]){
+            loser_data = {
+               loser_id: client_array[i].user_id,
+               loser_score: match_info[info[1]].user_left_score
+           }
+          }
+          if(client_array[i].client_id == matches[info[1]][3]) {
+            winner_data = {
+              winner_id: client_array[i].user_id,
+              winner_score: match_info[info[1]].user_right_score
+            }
+          }     
+        }
         //to database won loss
-    }
-
+      }
+      
+      const createdData: Promise<any> = db.matchHistory.create({
+        data:{
+          user1: winner_data.winner_id,
+          user2: loser_data.loser_id,
+          user1_score: winner_data.winner_score,
+          user2_score: loser_data.loser_score
+        }
+      })
+      const winner = db.user.findUnique({
+        where:{
+          id: winner_data.winner_id
+        }
+      })
+      const loser: Promise<any> = db.user.findUnique({
+        where:{
+          id:loser_data.loser_id
+        }
+      })
+      winner.then((res) => {
+        db.user.update({
+          where:{
+            id: res.id
+          },
+          data:{
+            win:res.win + 1,
+            level:  (0.5 - (res.win * 0.02)) < 0.1 ? 0.1 + res.level  :  (0.5 - (res.win * 0.02)) + res.level
+          }
+        }).then(() => {})
+      })
+      loser.then((res)=> {
+        db.user.update({
+          where:{
+            id: res.id
+          },
+          data:{
+            lose:res.lose + 1
+          }
+        }).then(() => {})
+      })
+      createdData.then((res) => {
+      }).catch((error) => console.log(error))
     if(matches[info[1]].length > 4)
       for(var i = 4; i < matches[info[1]].length; i++){
         this.wss.to(matches[info[1]][i]).emit("in_game", "stop");
     }
-
     match_info.splice(info[1], 1, {status : "died"});
     this.logger.log(info[1] + ". match finished")
     matches.splice(info[1], 1, 0);
     this.lobby_send_function();
-
 }
 
 handleConnection(client: Socket, ...args: any[]) {
@@ -161,26 +242,43 @@ handleConnection(client: Socket, ...args: any[]) {
 
 @SubscribeMessage('connection')
 handleNewConnectionFunction(client: Socket, data: any) {
-  //data[0] = connected/disconnection
-  if(data[0] === "connected") {
-    console.log(client.id + " connected successfully");
-    // for(let i = 0; i < waiting_room.length; i++)
-    // if(waiting_room[i][1] == data[1]){
-    //   this.wss.to(client.id).emit("status", [-1, 0,-1])
-    //   return
-    // }
+  if(data[0] == "connected") {
+    for(let i = 0; i < client_array.length; i++)
+      if(client_array[i].user_id == data[1]) {
+          this.wss.to(client.id).emit("status", [-1, 0,-1])
+          for(let i = 0; i < client_array.length; i++)
+              if(client_array[i].user_id == data[1])
+                client_array[i].user_count++;
+      }
+    client_array.push ({client_id : client.id, user_id : data[1], user_count : 1});
     waiting_room.push(client.id);
+    this.showWaitingRoom()
     this.init_function([client.id, 0])
-  } else {
+  } 
+   else {
     this.handleDisconnect(client);
   }
+}
+
+showWaitingRoom() {
+  if(waiting_room.length == 0)
+    console.log("waiting room -> null")
+  for(let i = 0; i < waiting_room.length; i++)
+    console.log("waiting room = " + waiting_room[i])
+}
+
+showMatches() {
+  if(matches.length == 0)
+    console.log("matches -> null")
+  for(let i = 0; i < matches.length; i++)
+    console.log("matches = " + matches[i])
 }
 
 
 game = (match_id: string, match_info_id ) => {
   if( match_info[match_info_id].ball_x  + match_info[match_info_id].radius < 0 ){
           match_info[match_info_id].user_right_score++;
-          if(match_info[match_info_id].user_right_score > 9) {
+          if(match_info[match_info_id].user_right_score > 2) {
               clearInterval(matches[match_info_id][1]);
               this.win_loss_function(["right", match_info_id]);
               return
@@ -190,7 +288,7 @@ game = (match_id: string, match_info_id ) => {
 
   }else if( match_info[match_info_id].ball_x  + match_info[match_info_id].radius > canvas_width){
           match_info[match_info_id].user_left_score++;
-          if(match_info[match_info_id].user_left_score > 9){
+          if(match_info[match_info_id].user_left_score > 2){
               clearInterval(matches[match_info_id][1]); 
               this.win_loss_function(["left", match_info_id]);
               return
@@ -224,7 +322,7 @@ game = (match_id: string, match_info_id ) => {
       let direction = (ball.x + match_info[match_info_id].radius < 500) ? 1 : -1;
       match_info[match_info_id].velocity_X = direction * match_info[match_info_id].speed * Math.cos(angleRad);
       match_info[match_info_id].velocity_Y = match_info[match_info_id].speed * Math.sin(angleRad);
-      match_info[match_info_id].speed += 0.1;
+      match_info[match_info_id].speed += 0.2;
   }
 
   this.wss.to(match_id).emit("in_game", match_info[match_info_id]); 
@@ -242,15 +340,24 @@ userMouseMovementHandle(client: Socket, side: string): void {   //WsResponse<str
 @SubscribeMessage('out-room')
 outRoomRequestHandler(client: Socket, match_id): void {   //WsResponse<string>
 
+    var flag = 1;
     client.leave(match_id.toString());
-    waiting_room.push(client.id);
+
+    for(let i = 0; i < waiting_room.length; i++) 
+      if(waiting_room[i] == client.id)
+        flag = 0;
+
+    if(flag)
+      waiting_room.push(client.id);
+
     for (let index = 0; index < matches.length; index++)
       if(matches[index][0] == match_id)
         for(let j = 0; j < matches[index].length; j++)
           if(matches[index][j] == client.id)
             matches[index].splice(j, 1);
     this.init_function([client.id, 1])
-
+    console.log("after esc")
+    this.showWaitingRoom()
 }
 
 @SubscribeMessage('join-room')
@@ -280,7 +387,7 @@ handleMessage(client: Socket, match_id: number) {
           ball_x: 500,
           ball_y: 400,
           radius: 10,
-          speed: 5,
+          speed: 15,
           velocity_X: 5.00,
           velocity_Y: 5.00,
           user_left_y : 200,
@@ -290,13 +397,16 @@ handleMessage(client: Socket, match_id: number) {
       });
           
           
-          var intervalId = setInterval(this.game, 1000/24, match_id.toString(), match_id_counter);
+          var intervalId = setInterval(this.game, 1000/50, match_id.toString(), match_id_counter);
 
           matches.splice(match_id_counter, 0,[match_id, intervalId, waiting_room[waiting_room.length-1], waiting_room[waiting_room.length-2]]);
           waiting_room.pop();
           waiting_room.pop();
           room_user_counter = 0;
+
         }
+        this.showWaitingRoom()
+        this.showMatches()
       }
   }
 }

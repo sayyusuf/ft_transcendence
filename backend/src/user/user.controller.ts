@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, FileTypeValidator, Get, HttpExce
 import { FileInterceptor } from '@nestjs/platform-express';
 import multer, { diskStorage } from 'multer';
 import { extname } from 'path';
-import { identity } from 'rxjs';
+import { identity, VirtualTimeScheduler } from 'rxjs';
 import { ChangeNickDto } from './dto/changenick.dto';
 import { UserService } from './user.service';
 
@@ -23,8 +23,8 @@ export class UserController {
 	}
 
 	@Get('id/:id')
-	getUserById(@Param('id') id){
-		return this.userService.getUserById(parseInt(id))
+	async getUserById(@Param('id') id){
+		return await this.userService.getUserById(parseInt(id))
 	}
 
 	@Post('change-nickname')
@@ -97,11 +97,13 @@ export class UserController {
 		return await this.userService.removeBlock(Number(id), nick)
 	}
 
-	@Get('test')
-	testGet(){
-		console.log('get atildi teste')
+	@Get('get-matches/:id')
+	async getMatchesById(@Param('id') id){
+		return await this.userService.getMatchesById(Number(id))
 	}
 
-	//@Post('')
-
+	@Post('set-status')
+	async changeUserStatus(@Body('id') id, @Body('status') status){
+		return await this.userService.changeStatusById(Number(id), Number(status))
+	}
 }

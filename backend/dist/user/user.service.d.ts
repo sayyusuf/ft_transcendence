@@ -34,4 +34,6 @@ export declare class UserService {
     removeBlock(id: any, nick: any): Promise<{
         nick: any;
     }>;
+    getMatchesById(id: any): Promise<any[]>;
+    changeStatusById(id: any, status: any): Promise<import(".prisma/client").User>;
 }

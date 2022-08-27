@@ -281,6 +281,8 @@ export class UserService {
 			const userWithNickExist = await this.getUserByNick(nick)
 			if (!userWithNickExist)
 				throw new HttpException('User not exist', HttpStatus.FORBIDDEN)
+			if (userWithNickExist.id === id)
+			throw new HttpException('You cannot add yourself', HttpStatus.FORBIDDEN)
 			const isUserAlreadyFriend = await this.isAlreadyFriend(userExist, userWithNickExist.id)
 			if (isUserAlreadyFriend)
 				throw new HttpException('User is already friend', HttpStatus.FORBIDDEN)
@@ -429,4 +431,47 @@ export class UserService {
 		})
 		return { nick:nick }
 	}
+
+	async getMatchesById(id){
+		const userExist = await this.getUserById(id)
+		if (!userExist)
+			throw new HttpException('User not exist', HttpStatus.FORBIDDEN)
+		const matches = await this.context.matchHistory.findMany({
+			where:{
+				OR:[
+					{
+						user1:id,				
+					},
+					{
+						user2:id
+					}
+				]
+			}
+		})
+		const retData = matches.map(async (value) => {
+			let opponent
+			if (value.user1 === id)
+				opponent = value.user2
+			else
+				opponent = value.user1
+			const opponentData = await this.getUserById(opponent)
+			const jsonCopy = JSON.parse(JSON.stringify(value))
+			jsonCopy.opponent = opponentData.nick
+			console.log(jsonCopy)
+			return jsonCopy
+		})
+		return Promise.all(retData)
+	}
+
+	async changeStatusById(id, status){
+		const userExist = await this.getUserById(id)
+		if (!userExist)
+			throw new HttpException('User not exist', HttpStatus.FORBIDDEN)
+		const updated = await this.context.user.update({
+			where:{ id:id },
+			data:{ status: status }
+		})
+		return updated
+	}
+
 }

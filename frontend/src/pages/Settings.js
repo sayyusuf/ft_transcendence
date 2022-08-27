@@ -19,6 +19,10 @@ export default function Settings() {
 	const handleAvatarClose = () => setShowAvatar(false);
   	const handleAvatarShow = () => setShowAvatar(true);
 
+	axios.post(`${process.env.REACT_APP_API_URL}/user/set-status`, {
+		id: user.id,
+		status: 1
+	}).then(() => {})
 
 	useEffect(() => {
 		if (!user.two_factor_enabled){

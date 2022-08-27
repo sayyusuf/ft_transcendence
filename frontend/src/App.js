@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import PrivateRoute from "./components/PrivateRoute";
+import PrivateRoute, { PrivateGameRoute } from "./components/PrivateRoute";
 import Layout from "./pages/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
@@ -10,16 +10,18 @@ import Settings from "./pages/Settings";
 import Friends from './pages/Friends'
 import Game from './pages/Game'
 
+
 function App() {
+
   return (
     <>
       <Routes>
         <Route path="/" element={<Layout/>}>
               <Route index={true} element={<PrivateRoute> <Dashboard/> </PrivateRoute>} />
-              <Route path="profile" element={<PrivateRoute> <Profile/> </PrivateRoute>} />
+              <Route path="profile/:id" element={<PrivateRoute> <Profile/> </PrivateRoute>} />
               <Route path="settings" element={<PrivateRoute> <Settings/> </PrivateRoute>} />
               <Route path="friends" element={<PrivateRoute> <Friends/> </PrivateRoute>} />
-              <Route path="game" element={<PrivateRoute> <Game/> </PrivateRoute>} />
+              <Route path="game" element={<PrivateGameRoute> <Game/> </PrivateGameRoute>} />
         </Route>      
         <Route path="/login" element={<Login/>} />
         <Route path="/auth" element={<Authorize/>} />

@@ -4,8 +4,8 @@ import {drawText, drawRect, drawCircle, welcome_page} from "../game/canvas_funct
 import GameLogo from '../game/icons8-game-64.png'
 import {io} from 'socket.io-client'
 import axios from "axios"
-
-
+import { useNavigate } from 'react-router-dom'
+import handleGlobalUnload from '../unload'
 	// select canvas element
 const Canvas = () => {
 	
@@ -18,10 +18,15 @@ const Canvas = () => {
 
 
 const Game = () => {
-	const { user, socket } = useAuth()
+	const { user, socket, setInGame } = useAuth()
+	const navigate = useNavigate()
 
 	function unloadHandler(){
-		axios.get(`${process.env.REACT_APP_API_URL}/user/test`).then(() => console.log('get atildi'))
+		axios.post(`${process.env.REACT_APP_API_URL}/user/set-status`, {
+			id: user.id,
+			status: 0
+		}).then(() => {})
+		socket.emit('connection', ['disconnect', user.id])
 	}
 
 
@@ -34,8 +39,7 @@ const Game = () => {
 			socket.off("status");
 			socket.off("lobby");
 			socket.off("in_game");
-			socket.emit('connection', ['disconnect', -1])
-			console.info( "This page is reloaded" );
+			socket.emit('connection', ['disconnect', user.id])
 		}
 		var game_Start_flag = 0;
 
@@ -79,8 +83,12 @@ const Game = () => {
 				drawText("Connected", 170, 300, 'green', c , "18px Arial");
 				drawText(socket.id, 170, 320, 'black', c , "18px Arial");
 				drawText("Your are in the Waiting Room", 170, 340, 'black', c , "18px Arial");
+				axios.post(`${process.env.REACT_APP_API_URL}/user/set-status`, {
+					id: user.id,
+					status: 1
+				}).then(() => {})
 			}
-			else if(status_id[0] == 2) {
+			else if(status_id[0] == 2) {			
 				socket.off("lobby_state");
 				socket.emit("join-room", status_id[2]);
 				if(!status_id[1])
@@ -93,8 +101,16 @@ const Game = () => {
 				c.clearRect(0, 0, canvas.width, canvas.height);
 				game_Start_flag = 1; //in match mode
 				socket.on("in_game", render);
+				axios.post(`${process.env.REACT_APP_API_URL}/user/set-status`, {
+					id: user.id,
+					status: 2
+				}).then(() => {})
 			}
-			
+			else if (status_id[0] == -1){
+				socket.off("status");
+				socket.off("lobby_state");
+				navigate('/')
+			}
 		}
 
 		function check(e) {
@@ -192,6 +208,10 @@ const Game = () => {
 				drawText("You Won !", 40, canvas.height/2, 'black', c , "30px Arial");
 				drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");
 				game_Start_flag = 4; //game finish;
+				axios.post(`${process.env.REACT_APP_API_URL}/user/set-status`, {
+					id: user.id,
+					status: 1
+				}).then(() => {})
 				return
 			}
 			if(data == "loss") {
@@ -200,6 +220,10 @@ const Game = () => {
 				drawText("You Lost !", 40, canvas.height/2, 'black', c , "30px Arial");
 				drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");
 				game_Start_flag = 4; //game finish;
+				axios.post(`${process.env.REACT_APP_API_URL}/user/set-status`, {
+					id: user.id,
+					status: 1
+				}).then(() => {})
 				return
 			}
 			if(game_Start_flag) {
@@ -239,15 +263,16 @@ const Game = () => {
 		}
 
 		socket.on("status", statusHandle_function);
+		window.removeEventListener('unload', handleGlobalUnload)
 		window.addEventListener('unload', unloadHandler)
 		return () => {
 			console.log('component unmount')
 			socket.off("status");
 			socket.off("lobby");
 			socket.off("in_game");
-			socket.emit('connection', ['disconnect', -1])
-			axios.get(`${process.env.REACT_APP_API_URL}/user/test`).then(() => console.log('get atildi'))
+			socket.emit('connection', ['disconnect', user.id])
 			window.removeEventListener('unload', unloadHandler)
+			window.addEventListener('unload', handleGlobalUnload)
 		}
 	}, [])
 	return (

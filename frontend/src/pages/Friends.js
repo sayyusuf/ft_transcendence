@@ -4,8 +4,9 @@ import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import '../css/chat.css'
 import { io } from 'socket.io-client';
+import UserStatus from "../components/UserStatus";
 
-const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr }) => {
+const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr, opponent }) => {
 	
 	const [msg, setMsg] = useState('')
 	const {user, socket} = useAuth()
@@ -35,7 +36,9 @@ const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr }) => {
 					<div>
 						<ul id="messages">
 							{filterMessage.map((msg, index) => (
-								<li key={index}>{msg.data}</li>
+								<li key={index}>
+									<b>{`${msg.sender === user.id ? user.nick : opponent}: `}</b>{msg.data}
+									</li>
 							))}
 						</ul>
 					</div>
@@ -67,14 +70,17 @@ const Friends = () => {
 	const [msgArr, setMsgArr] = useState([])
 	const [friendArray, setFriendArray] = useState([])
 	const [activeChat, setActiveChat] = useState(false)
-	const [activeChatUser, setActiveChatUser] = useState(false)
+	const [activeChatUser, setActiveChatUser] = useState({})
 	const [blockArray, setBlockArray] = useState([])
 	const [refresh, setRefresh] = useState(false)
 	const [showChat, setShowChat] = useState(false)
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
-	
+	axios.post(`${process.env.REACT_APP_API_URL}/user/set-status`, {
+		id: user.id,
+		status: 1
+	}).then(() => {})
 
 	const handleAddFriend = () => {
 		const payload = {
@@ -82,8 +88,10 @@ const Friends = () => {
 			nick: addNick
 		}
 		axios.post(`${process.env.REACT_APP_API_URL}/user/add-friend`, payload)
-			.then((response) => {
+			.then((response) => {			
+				setRefresh(!refresh)
 				alert(`${response.data.nick} added as a friend`)
+				
 			})
 			.catch(() => {
 				alert(`User with nickname: ${addNick} is not found`)
@@ -98,10 +106,11 @@ const Friends = () => {
 
 		axios.post(`${process.env.REACT_APP_API_URL}/user/block-friend`, payload)
 			.then((response) => {
-				alert(`${response.data.nick} blocked`)
+				setRefresh(!refresh)
+				alert(`${response.data.nick} blocked`)			
 			})
 			.catch(() => {
-				alert(`User with nickname: ${addNick} couldnt be blocked`)
+				alert(`User with nickname: ${addNick} couldnt be blocked`)			
 			})
 	}
 
@@ -113,6 +122,7 @@ const Friends = () => {
 		axios.post(`${process.env.REACT_APP_API_URL}/user/remove-block`, payload)
 			.then((response) => {
 				alert(`${response.data.nick} is unblocked`)
+				setRefresh(!refresh)
 			})
 			.catch(() => {
 				alert(`User with nickname: ${addNick}  couldnt be unblocked`)
@@ -141,17 +151,20 @@ const Friends = () => {
 				setMsgArr([...msgArr, parsed])
 				
 			})
-	}, [msgArr])
+	}, [msgArr,blockArray, refresh])
 
 	return (
 		<>
-			<Button variant="primary" className="mb-2" onClick={handleShow}>Add Friend</Button>
+			<div className="text-center">	
+				<Button variant="primary" className="mb-2 text-center" onClick={handleShow}>Add Friend</Button>
+			</div>
+		
 			<Row style={{height: '70vh'}}>
 				{activeChat ? (
 					<Col md={4} >
 					<Card style={{height:'100%'}}>
 						<Card.Body>
-							<Chat msgArr={msgArr} setMsgArr={setMsgArr} setActiveChat={setActiveChat} activeChatUser={activeChatUser} />
+							<Chat msgArr={msgArr} setMsgArr={setMsgArr} setActiveChat={setActiveChat} activeChatUser={activeChatUser.friend_id} opponent={activeChatUser.nick} />
 						</Card.Body>
 					</Card>
 				</Col>
@@ -169,12 +182,12 @@ const Friends = () => {
 									<ListGroupItem key={index}>
 										<div className="d-flex justify-content-between">
 											<div>
-												{friend.nick}
+											<UserStatus userId={friend.id} />	<h3 className="px-1  d-inline-block" >{friend.nick}</h3>  
 											</div>
 											<div>
 												<Button onClick={() => {
 													console.log(friend.id)
-													setActiveChatUser(friend.id)
+													setActiveChatUser({nick:friend.nick , friend_id:friend.id})
 													console.log(activeChatUser)
 													setActiveChat(true)
 												}}  variant="success">Chat</Button>
@@ -202,7 +215,7 @@ const Friends = () => {
 									<ListGroupItem key={index}>
 										<div className={"d-flex justify-content-between"}>
 											<div>
-												{block.name} {block.surname} - {block.nick}
+												<h3 className="d-inline-block">{block.nick}</h3>
 											</div>
 											<Button onClick={() => handleRemoveBlock(block.nick)} variant="success">Unblock</Button>
 										</div>

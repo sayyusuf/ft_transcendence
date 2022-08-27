@@ -7,7 +7,7 @@ import '../../css/layout.css'
 
 const Layout = () => {
 	const navigate = useNavigate()
-	const {setUser} = useAuth()
+	const {setUser, user} = useAuth()
 	
 	const handleBrand = () => {
 		navigate('/')
@@ -25,11 +25,12 @@ const Layout = () => {
 				<Navbar.Brand style={{cursor: "pointer"}} onClick={handleBrand}>PONG</Navbar.Brand>
 				<Nav className="me-auto">
 					<NavLink to="/" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Home</NavLink>	
-					<NavLink to="/profile" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Profile</NavLink>
+					<NavLink to={`/profile/${user.id}`} className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Profile</NavLink>
 					<NavLink to="/settings" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Settings</NavLink>
 					<NavLink to="/friends" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Friends</NavLink>
-					<NavLink to="/game" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Game</NavLink>
-					<a style={{cursor: "pointer"}} onClick={handleLogout} className="nav-link">Çıkış yap</a>
+					<NavLink to="/game" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Play</NavLink>
+					
+					<a style={{cursor: "pointer"}} onClick={handleLogout} className="nav-link">Log Out</a>
 				</Nav>
 				</Container>
 			</Navbar>
