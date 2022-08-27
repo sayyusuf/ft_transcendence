@@ -30,7 +30,7 @@ const Game = () => {
 	}
 
 
-	useEffect(() => {
+useEffect(() => {
 		const canvas = document.getElementById("pong");
 		const c = canvas.getContext('2d');
 		

@@ -3,12 +3,15 @@ import { Button } from "react-bootstrap"
 import { useEffect, useState } from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCoffee, faEye } from '@fortawesome/free-solid-svg-icons'
+import { useNavigate } from "react-router"
 
 const UserStatus = ({ userId }) => {
 	const [stat, setStat] = useState(false)
+	const navigate = useNavigate()
 
-	
-	
+	const handleWatchGame = () => {
+		navigate(`/watch-game/${userId}`)
+	}
 
 	useEffect(() => {
 		const interval = setInterval( () => {
@@ -40,7 +43,7 @@ const UserStatus = ({ userId }) => {
 			marginTop:'10px',
 		}}  className="dot"></span>
 		{ stat === 2 ? (
-				<Button style={{
+				<Button onClick={handleWatchGame}  style={{
 					backgroundColor:`#FFA500`,
 					padding:'5px',
 					marginLeft:'10px!important',

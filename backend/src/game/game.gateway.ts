@@ -409,4 +409,31 @@ handleMessage(client: Socket, match_id: number) {
         this.showMatches()
       }
   }
+
+
+  @SubscribeMessage('join-room_from_another_page')
+  handleJoinRoomFromAnotherPage (client: Socket, user_id: number) {
+    console.log("join room user id -> " + user_id)
+    var client_id_for_match_id = -1;
+
+    for(let i = 0; i < client_array.length; i++) {
+      if(client_array[i].user_id == user_id) {
+        client_id_for_match_id = client_array[i].client_id;
+        
+      }
+    }
+
+
+    for(let i = 0; i < matches.length; i++) {
+      if(matches[i][2] == client_id_for_match_id || matches[i][3] == client_id_for_match_id) {
+        client.join(matches[i][0].toString()); 
+        matches[i].push(client.id);
+      }
+    }
+
+
+    
+  }
+
+
 }

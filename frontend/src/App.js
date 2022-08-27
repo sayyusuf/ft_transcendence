@@ -9,7 +9,7 @@ import Authorize from "./pages/Authorize";
 import Settings from "./pages/Settings";
 import Friends from './pages/Friends'
 import Game from './pages/Game'
-
+import WatchGame from './pages/WatchGame'
 
 function App() {
 
@@ -22,6 +22,7 @@ function App() {
               <Route path="settings" element={<PrivateRoute> <Settings/> </PrivateRoute>} />
               <Route path="friends" element={<PrivateRoute> <Friends/> </PrivateRoute>} />
               <Route path="game" element={<PrivateGameRoute> <Game/> </PrivateGameRoute>} />
+              <Route path="watch-game/:id" element={<PrivateGameRoute> <WatchGame/> </PrivateGameRoute>} />
         </Route>      
         <Route path="/login" element={<Login/>} />
         <Route path="/auth" element={<Authorize/>} />

@@ -428,7 +428,6 @@ let UserService = class UserService {
             const opponentData = await this.getUserById(opponent);
             const jsonCopy = JSON.parse(JSON.stringify(value));
             jsonCopy.opponent = opponentData.nick;
-            console.log(jsonCopy);
             return jsonCopy;
         });
         return Promise.all(retData);
