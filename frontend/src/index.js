@@ -7,8 +7,6 @@ import handleGlobalUnload from './unload'
 
 window.onunload = handleGlobalUnload
 
-
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>

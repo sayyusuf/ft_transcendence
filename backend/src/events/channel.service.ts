@@ -102,11 +102,9 @@ export class ChannelService {
 
 
   async getInfo() : Promise<any>{
-    return ({
-      channel_name : this.data.channel_name,
-      channel_id : this.data.channel_id,
-      channel_status : this.data.channel_status,
-    })
+    const temp = this.data
+    temp.users.map((user) => delete user.socket)
+    return temp
   }
 
   async getInfoLow() : Promise<any>{
@@ -118,23 +116,20 @@ export class ChannelService {
 
 
   async addUser(user: any): Promise<boolean> {
-    if (this.isInChannel(user.user_id)) {
+    if (await this.isInChannel(user.user_id)) {
       return true;
     }
-    if (this.isBanned(user.user_id)) {
-      return false;
-    }
-    if (this.data.channel_status === 0) {
+    if (await this.isBanned(user.user_id)) {
       return false;
     }
     if (
-      this.data.channel_status === 1 &&
+      (this.data.channel_status === 1 || this.data.channel_status === 0  )&&
       user.password === this.data.password
     ) {
       delete user.password;
       if (this.data.users.length === 0){
         user.is_owner = true;
-        this.data.owners.push(user.user_is);
+        this.data.owners.push(user.user_id);
       }
       this.data.users.push(user);
       return true;
@@ -142,7 +137,7 @@ export class ChannelService {
     if (this.data.channel_status === 2) {
       if (this.data.users.length === 0){
         user.is_owner = true;
-        this.data.owners.push(user.user_is);
+        this.data.owners.push(user.user_id);
       }
       delete user.password;
       this.data.users.push(user);
@@ -163,7 +158,7 @@ export class ChannelService {
 
   async setOffline(client: any) {
     for (let i = 0; i < this.data.users.length; i++) {
-      if (client.id === this.data.users[i].socket.id) {
+      if (this.data.users[i].is_online && undefined !== this.data.users[i].socket  && client.id === this.data.users[i].socket.id) {
         this.data.users[i].is_online = false;
         this.data.users[i].socket = undefined;
         return;

@@ -5,10 +5,9 @@ export default function Channel(){
 	return(
 		<Card>
 			<Card.Body>
-				<Row>
-					<Col className="col-2 border-dark" style={{
-						borderRightWidth:'3px',
-						borderRightColor:'black!important',		
+				<Row className="border-between">
+					<Col className="col-2" style={{
+						borderRight: "1px solid #ccc"
 					}}>
 						<ChannelList/>
 					</Col>

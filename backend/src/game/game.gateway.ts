@@ -11,7 +11,7 @@ const matches = new Array();
 const match_info = new Array();
 const db = new PrismaService()
 
-  const  client_array = new Array();
+const  client_array = new Array();
 
   var match_id_counter = -1;
   var room_user_counter = 0;

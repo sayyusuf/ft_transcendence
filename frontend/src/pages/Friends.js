@@ -66,8 +66,7 @@ const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr, opponent }) =>
 const Friends = () => {
 	const [show, setShow] = useState(false);
 	const [addNick, setNick] = useState('')
-	const { user, socket} = useAuth()
-	const [msgArr, setMsgArr] = useState([])
+	const { user, socket, msgArr, setMsgArr} = useAuth()
 	const [friendArray, setFriendArray] = useState([])
 	const [activeChat, setActiveChat] = useState(false)
 	const [activeChatUser, setActiveChatUser] = useState({})

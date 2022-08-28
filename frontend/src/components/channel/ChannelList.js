@@ -1,6 +1,8 @@
-import { Row, Col ,Button, Card, Form, Modal, ListGroup } from 'react-bootstrap'
-import { useState } from 'react'
+import { Row, Col ,Button, Form, Modal, ListGroup } from 'react-bootstrap'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext';
+import AllChannels from './AllChannels';
+import MyChannels from './MyChannels';
 
 export default function ChannelList(){
 	const {user, socket} = useAuth()
@@ -12,6 +14,18 @@ export default function ChannelList(){
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
 
+	const send = {
+		user_id:user.id
+	}	
+	socket.addEventListener('GET_ALL', (data) => {
+		const parsed = JSON.parse(data)
+		setMyChannels(parsed.my_channels)
+		setAllChannels(parsed.all_channels)
+	})
+	useEffect(() => {
+		socket.emit('ONLINE', JSON.stringify(send) )
+	}, [])
+	
 	const handleCreateChannel = () => {
 		const chann_name = document.getElementById('formChannelName').value
 		const type = document.getElementById('formChannelType').value
@@ -33,36 +47,20 @@ export default function ChannelList(){
 		socket.emit('CHAN', JSON.stringify(data))
 	}
 
-	socket.addEventListener('GET_ALL', (data) => {
-		const parsed = JSON.parse(data)
-		console.log('merhaba')
-		setMyChannels(parsed.my_channels)
-		setAllChannels(parsed.all_channels)
-	})
-
 	console.log(myChannels)
 	console.log(allChannels)
+	
+
 	return (		
 		<>
 			<Row>
 				<Col className="col-12">
-					<Button onClick={handleShow}  variant="primary">Create Channel</Button>
+					<Button onClick={handleShow} style={{marginLeft:'16px'}}  variant="primary">Create Channel</Button>
 					<hr/>
 				</Col>
 				<Col className="col-12">
-					<h2>My Channels</h2>
-					<hr/>
-					<ListGroup>
-						<ListGroup.Item>
-							<b>Cras justo odio	</b>
-						</ListGroup.Item>
-						<ListGroup.Item><b>Cras justo odio</b></ListGroup.Item>
-						<ListGroup.Item><b>Cras justo odio</b></ListGroup.Item>
-						<ListGroup.Item><b>Cras justo odio</b></ListGroup.Item>
-						<ListGroup.Item><b>Cras justo odio</b></ListGroup.Item>
-					</ListGroup>
-					<hr/>
-					<h2>All Channels</h2>
+					<MyChannels myChannels={myChannels} />
+					<AllChannels allChannels={allChannels} />
 				</Col>
 			</Row>
 

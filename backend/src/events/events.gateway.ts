@@ -18,7 +18,9 @@ import { Server } from 'socket.io';
 import { ChannelService } from './channel.service';
 
 
-const channels = [];
+const channels: ChannelService[] = [];
+
+const onlineUsers = []
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class EventsGateway
@@ -27,9 +29,15 @@ export class EventsGateway
   @WebSocketServer()
   server: Server;
 
-  handleDisconnect(client: any) {
+  async handleDisconnect(client: any) {
     for (let i = 0; i < channels.length; i++) {
-      channels[i].setOffline(client);
+      await channels[i].setOffline(client);
+    }
+    for (let i = 0; i < onlineUsers.length; i++) {
+      if (client.id === onlineUsers[i].client.id){
+        onlineUsers.splice(i, 1)
+        return
+      }
     }
     console.log('disconnected');
   }
@@ -63,12 +71,11 @@ export class EventsGateway
   async handleChannel(client: any, data: any): Promise<any> {
     let com = JSON.parse(data);
     const check = await this.isOnChannel(com.channel_name)
-    console.log(check)
     if (check) {
       //client.emit() // hata
       return false; // emit yapilacak
     } else {
-      let id = this.getRandomInt();
+      let id = await this.getRandomInt();
       channels.push(
         new ChannelService({
           channel_name: com.channel_name,
@@ -77,9 +84,10 @@ export class EventsGateway
           channel_status: com.status,
           password: com.password,
           owners: [],
+          banned_users:[]
         }),
-       await this.handleChannelJoin(client, JSON.stringify(data))
       );
+      await this.handleChannelJoin(client, data)
       await this.handleGetAll(client, data)
       return true;
     }
@@ -89,10 +97,9 @@ export class EventsGateway
   async handleChannelJoin(client: any, data: any): Promise<any> {
     let com = JSON.parse(data);
     let res: boolean;
-
     for (let i = 0; i < channels.length; i++) {
       // channel varsa
-      if (com.channel_name === channels[i].getChannelName()) {
+      if (com.channel_name === await channels[i].getChannelName()) {
         res = await channels[i].addUser({
           socket: client,
           user_id: com.user_id,
@@ -103,10 +110,12 @@ export class EventsGateway
           password: com.password,
         });
         if (res === false) {
+          
           // emit olcak
           //client.emit() hata
           return false;
         } else {
+        
           //client.emit() channels[i].chan_id
           return true;
         }
@@ -141,6 +150,9 @@ export class EventsGateway
           await channels[i].unBanUser(com.user_id, com.param1);
         else if (com.command === "change_status")
           await channels[i].changeStatus(com.user_id, com.param1);
+        else if (com.command === "add_admin")
+          await channels[i].addOwner(com.user_id, com.param1);
+       await this.handleGetAll(client, data)  
         return (true)
       }
     }
@@ -151,31 +163,35 @@ export class EventsGateway
   @SubscribeMessage('GET_ALL')
   async handleGetAll(client: any, data: any) {
     let com = JSON.parse(data);
-    console.log(com)
-    const my = []
+   
     const all = []
-
-    for (let i = 0; i < channels.length; i++) {
-      if (await channels[i].isInChannel(com.user_id))
-        my.push(await channels[i].getInfo())
-    }
     for (let index = 0; index < channels.length; index++) {
       all.push(await channels[index].getInfoLow())
     }
-    console.log(my)
-    console.log(all)
-    client.emit('GET_ALL', JSON.stringify({ my_channels:my, all_channels: all }))
+
+    for (let i = 0; i < onlineUsers.length; i++) {
+      const my = []
+
+      for (let j = 0; j < channels.length; j++) {
+        if (await channels[j].isInChannel(onlineUsers[i].user_id)){
+          my.push(await channels[j].getInfo())
+        }
+      }
+        onlineUsers[i].client.emit('GET_ALL', JSON.stringify({ my_channels:my, all_channels: all }))    
+    }
   }
   
 
   @SubscribeMessage('ONLINE')
   async handleOnline(client: any, data: any) {
+    console.log('online geldi')
     let com = JSON.parse(data);
-
+    onlineUsers.push({ client:client, user_id: com.user_id })
     for (let i = 0; i < channels.length; i++) {
-      if (channels[i].isInChannel(com.user_id))
-        channels[i].setOnline(com.user_id, client);
+      if (await channels[i].isInChannel(com.user_id))
+        await channels[i].setOnline(com.user_id, client);
     }
+    await this.handleGetAll(client, data)
   }
 
   /*
