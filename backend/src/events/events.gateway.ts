@@ -73,66 +73,18 @@ export class EventsGateway
         new ChannelService({
           channel_name: com.channel_name,
           channel_id: id,
-          users: [
-            {
-              socket: client,
-              user_id: com.user_id,
-              user_nick: com.user_nick,
-              is_owner: true,
-              is_muted: false,
-              is_online: true,
-            },
-          ],
+          users: [],
           channel_status: com.status,
           password: com.password,
-          owners: [com.user_id],
+          owners: [],
         }),
+       await this.handleChannelJoin(client, JSON.stringify(data))
       );
       await this.handleGetAll(client, data)
       return true;
     }
   }
 
-  @SubscribeMessage('GET_ALL')
-  async handleGetAll(client: any, data: any) {
-    let com = JSON.parse(data);
-    console.log(com)
-    const my = []
-    const all = []
-
-    for (let i = 0; i < channels.length; i++) {
-      const check = await channels[i].isInChannel(com.user_id)
-      console.log('check ', check)
-      if (check)
-        my.push(await channels[i].getChannelName())
-    }
-    for (let index = 0; index < channels.length; index++) {
-      all.push(await channels[index].getChannelName())
-    }
-    console.log(my)
-    console.log(all)
-    client.emit('GET_ALL', JSON.stringify({ my_channels:my, all_channels: all }))
-  }
-  
-
-  @SubscribeMessage('ONLINE')
-  async handleOnline(client: any, data: any) {
-    let com = JSON.parse(data);
-
-    for (let i = 0; i < channels.length; i++) {
-      if (channels[i].isInChannel(com.user_id))
-        channels[i].setOnline(com.user_id, client);
-    }
-  }
-
-  /*
-    data {
-      user_id: number,
-      user_nick: string,
-      channel_name: string,
-      password: string
-    }
-    */
   @SubscribeMessage('JOIN')
   async handleChannelJoin(client: any, data: any): Promise<any> {
     let com = JSON.parse(data);
@@ -161,6 +113,91 @@ export class EventsGateway
       }
     }
   }
+
+/*
+{
+  user_id : number,
+  channel_name: string;
+  commnad: string,
+  param1: any,
+  param2 : any
+}
+*/
+  @SubscribeMessage('ADMIN')
+  async handleAdmin(client: any, data : any) : Promise<boolean>{
+    let com : any = JSON.stringify(data)
+    for (let i : number = 0; i < channels.length; i++){
+      if (com.channel_name === channels[i].getChannelName()){
+
+        if (com.command === "change_password")
+          await channels[i].changePassw(com.user_id, com.param1);
+        else if(com.command === "mute_user")
+          await channels[i].muteUser(com.user_id, com.param1);
+        else if(com.command === "unmute_user")
+          await channels[i].unMuteUser(com.user_id, com.param1);
+        else if(com.command === "ban_user")
+          await channels[i].banUser(com.user_id, com.param1);
+        else if(com.command === "unban_user")
+          await channels[i].unBanUser(com.user_id, com.param1);
+        else if (com.command === "change_status")
+          await channels[i].changeStatus(com.user_id, com.param1);
+        return (true)
+      }
+    }
+    return false;
+  }
+
+
+  @SubscribeMessage('GET_ALL')
+  async handleGetAll(client: any, data: any) {
+    let com = JSON.parse(data);
+    console.log(com)
+    const my = []
+    const all = []
+
+    for (let i = 0; i < channels.length; i++) {
+      if (await channels[i].isInChannel(com.user_id))
+        my.push(await channels[i].getInfo())
+    }
+    for (let index = 0; index < channels.length; index++) {
+      all.push(await channels[index].getInfoLow())
+    }
+    console.log(my)
+    console.log(all)
+    client.emit('GET_ALL', JSON.stringify({ my_channels:my, all_channels: all }))
+  }
+  
+
+  @SubscribeMessage('ONLINE')
+  async handleOnline(client: any, data: any) {
+    let com = JSON.parse(data);
+
+    for (let i = 0; i < channels.length; i++) {
+      if (channels[i].isInChannel(com.user_id))
+        channels[i].setOnline(com.user_id, client);
+    }
+  }
+
+  /*
+    data {
+      user_id: number,
+      user_nick: string,
+      channel_name: string,
+      password: string
+    }
+    */
+/*
+
+    {
+      socket: client,
+      user_id: com.user_id,
+      user_nick: com.user_nick,
+      is_owner: true,
+      is_muted: false,
+      is_online: true,
+    },
+*/
+
 
   /*
   data {
