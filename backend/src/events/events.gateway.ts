@@ -36,10 +36,10 @@ export class EventsGateway
     for (let i = 0; i < onlineUsers.length; i++) {
       if (client.id === onlineUsers[i].client.id){
         onlineUsers.splice(i, 1)
+         console.log('disconnected');
         return
       }
     }
-    console.log('disconnected');
   }
   handleConnection(client: any, ...args: any[]) {
     console.log('connected = ' + client.id);
@@ -110,13 +110,12 @@ export class EventsGateway
           password: com.password,
         });
         if (res === false) {
-          
-          // emit olcak
-          //client.emit() hata
+          console.log('false yolladim')
+          client.emit('JOIN_STATUS', false)
           return false;
         } else {
-        
-          //client.emit() channels[i].chan_id
+          this.handleGetAll(client, data)
+          client.emit('JOIN_STATUS', true)
           return true;
         }
       }

@@ -11,7 +11,10 @@ export default function ChannelList(){
 	const [myChannels, setMyChannels] = useState([])
 	const [allChannels, setAllChannels] = useState([])
 
-	const handleClose = () => setShow(false);
+	const handleClose = () => {
+		setShowPass(false)
+		setShow(false)
+	}
 	const handleShow = () => setShow(true);
 
 	const send = {
@@ -44,6 +47,8 @@ export default function ChannelList(){
 			status: status,
 			password: pass
 		}
+		setShowPass(false)
+		setShow(false)
 		socket.emit('CHAN', JSON.stringify(data))
 	}
 
@@ -60,7 +65,7 @@ export default function ChannelList(){
 				</Col>
 				<Col className="col-12">
 					<MyChannels myChannels={myChannels} />
-					<AllChannels allChannels={allChannels} />
+					<AllChannels myChannels={myChannels}  allChannels={allChannels} />
 				</Col>
 			</Row>
 

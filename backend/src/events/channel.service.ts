@@ -132,6 +132,7 @@ export class ChannelService {
         this.data.owners.push(user.user_id);
       }
       this.data.users.push(user);
+      console.log('bad geldi')
       return true;
     }
     if (this.data.channel_status === 2) {
@@ -143,6 +144,7 @@ export class ChannelService {
       this.data.users.push(user);
       return true;
     }
+    console.log('false dondu en son')
     return false;
   }
 
