@@ -10,8 +10,15 @@ export const AuthProvider = ({ children }) => {
 	const socket = io(`${process.env.REACT_APP_API_URL}`)
 	
 	
+	useEffect(() => {
+		socket.addEventListener(user.id, (data) => {
+			const parsed = JSON.parse(data)
+			setMsgArr([...msgArr, parsed])
+		})
+	}, [msgArr])
 	
 	
+
 	const data = {
 		user,
 		setUser,

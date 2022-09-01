@@ -83,8 +83,8 @@ export default function ChannelMembers({ myChannels, currentChannel }){
 			<h4 className="font-weight-light" >Member List</h4>
 			<hr/>
 			<ListGroup>
-				{myChannels[currentChannel].users.map((myuser) => (
-					<ListGroup.Item>
+				{myChannels[currentChannel].users.map((myuser, index) => (
+					<ListGroup.Item key={index}>
 						<div>
 							<b>{myuser.user_nick}</b>  {myuser.is_muted ? <FontAwesomeIcon icon={faVolumeMute} /> : ''}
 							{myuser.user_id !== user.id ? <a onClick={() => handleProfile(myuser.user_id)} style={{cursor: 'pointer'}}  className="text-decoration-none text-primary"> Profile </a> : ''}
@@ -108,11 +108,11 @@ export default function ChannelMembers({ myChannels, currentChannel }){
 			</ListGroup>
 			<h4 className="font-weight-light mt-2" >Banned Users</h4>
 			<ListGroup>
-				{myChannels[currentChannel].banned_users.map((user) => (
-					<ListGroup.Item>
+				{myChannels[currentChannel].banned_users.map((user, index) => (
+					<ListGroup.Item key={index}>
 						<b className="d-block">{user.user_nick}</b>
 						{is_owner() ? (						
-							<Button onClick={() => handleUnban(user.user_id)} style={{fontSize:'12px'}} variant="success"  > <FontAwesomeIcon icon={faCheck} /> </Button>
+							<Button onClick={() => handleUnban(user.user_id)} style={{fontSize:'8px'}} variant="success"  > <FontAwesomeIcon icon={faCheck} /> </Button>
 						) : ''}
 					</ListGroup.Item>
 				))}

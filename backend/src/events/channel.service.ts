@@ -64,7 +64,6 @@ export class ChannelService {
     this.data = data;
 
     this.socket = io(`http://localhost:3334`);
-    console.log(`consturcotr`, this.socket)
     this.socket.addEventListener(this.data.channel_id, (data) => {
        this.sendAll(data);
     });
@@ -76,9 +75,18 @@ export class ChannelService {
     if (await this.isBanned(com.sender)) return false;
     if (await this.isMuted(com.sender)) return false;
 
+    const payload = {
+      sender : this.data.channel_id,
+      target: 0,
+      replier: com.sender,
+      replier_nick:com.sender_nick,
+      data: com.data
+    }
     for (let i = 0; i < this.data.users.length; i++) {
       if (this.data.users[i].is_online === true) {
-        this.data.users[i].socket.emit(this.data.channel_id, data);
+        payload.target = this.data.users[i].user_id;
+        this.socket.emit("PRIV", JSON.stringify(payload));
+      //  this.data.users[i].socket.emit(this.data.users[i].user_id, JSON.stringify(payload));
       }
     }
   }

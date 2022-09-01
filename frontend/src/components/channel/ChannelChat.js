@@ -2,19 +2,21 @@ import { useState } from 'react'
 import { Row, Col, Button, Form } from 'react-bootstrap'
 import { useAuth } from '../../context/AuthContext'
 
-export default function ChannelChat({ channMsgArr, setChannMsgArr, myChannels, currentChannel }){
-	const { user, socket } = useAuth()
+export default function ChannelChat({ myChannels, currentChannel }){
+	const { user, socket, msgArr, setMsgArr } = useAuth()
 	const [msg, setMsg] = useState('')
 
 	const handleSend = () => {
 		const payload = {
 			target: myChannels[currentChannel].channel_id,
 			sender: user.id,
-			msg: msg
+			sender_nick:user.nick,
+			data: msg
 		}
 		socket.emit('PRIV', JSON.stringify(payload))
 	}
 
+	const filterMessage = msgArr.filter((msg) => msg.sender === myChannels[currentChannel].channel_id);
 	return (
 		<>
 			<div id="chat-div" style={{
@@ -25,7 +27,11 @@ export default function ChannelChat({ channMsgArr, setChannMsgArr, myChannels, c
 				}}>
 					<div>
 						<ul id="messages">
-							
+						{filterMessage.map((msg, index) => (
+								<li key={index}>
+									<b>{`${msg.replier_nick}: `} </b>{msg.data}
+								</li>
+							))}
 						</ul>
 					</div>
 					<div>

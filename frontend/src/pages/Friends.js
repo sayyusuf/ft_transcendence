@@ -144,11 +144,8 @@ const Friends = () => {
 				setBlockArray(blocks)
 			})
 			.catch(() => console.log('error'))
-		socket.addEventListener(user.id, (data) => {
-				const parsed = JSON.parse(data)
-				setMsgArr([...msgArr, parsed])		
-		})
-	}, [msgArr,blockArray, refresh])
+		
+	}, [blockArray, refresh])
 
 	return (
 		<>
@@ -183,9 +180,7 @@ const Friends = () => {
 											</div>
 											<div>
 												<Button onClick={() => {
-													console.log(friend.id)
 													setActiveChatUser({nick:friend.nick , friend_id:friend.id})
-													console.log(activeChatUser)
 													setActiveChat(true)
 												}}  variant="success">Chat</Button>
 												<Button style={{ marginLeft: '8px' }} onClick={() => handleBlock(friend.nick)} variant="danger">Block</Button>

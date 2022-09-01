@@ -7,12 +7,11 @@ import ChannelChat from '../components/channel/ChannelChat'
 import '../css/channel.css'
 
 export default function Channel(){
-	const { socket } = useAuth()
+	const { msgArr } = useAuth()
 	const [currentChannel, setCurrentChannel] = useState(-1)
 	const [myChannels, setMyChannels] = useState([])
-	const [channMsgArr, setChannMsgArr] = useState([])
 
-	console.log(myChannels)
+	console.log(msgArr)
 	return(
 		<Card>
 			<Card.Body id="channel-card">
@@ -24,7 +23,9 @@ export default function Channel(){
 						<ChannelList  myChannels={myChannels} setMyChannels={setMyChannels} currentChannel={currentChannel}  setCurrentChannel={setCurrentChannel}  />
 					</Col>
 					<Col className="col-7" style={{overflowY:'auto'}}>
-						<ChannelChat myChannels={myChannels} setMyChannels={setMyChannels} currentChannel={currentChannel} channMsgArr={channMsgArr} setChannMsgArr={setChannMsgArr}/>
+						{myChannels[currentChannel] === undefined ? '' : (
+							<ChannelChat myChannels={myChannels} setMyChannels={setMyChannels} currentChannel={currentChannel}/>
+						)}				
 					</Col>
 					<Col className="col-3" style={{
 						borderLeft: "1px solid #ccc",
