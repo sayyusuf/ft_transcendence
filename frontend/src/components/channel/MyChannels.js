@@ -2,7 +2,7 @@ import {ListGroup, Modal, Form, Button } from 'react-bootstrap'
 import { useAuth } from '../../context/AuthContext'
 import { useState } from 'react'
 
-export default function MyChannels({ myChannels }){
+export default function MyChannels({ myChannels, setCurrentChannel }){
 	const { user, socket } = useAuth()
 	const [show, setShow] = useState(false);
 	const [showPass, setShowPass] = useState(false)
@@ -36,13 +36,24 @@ export default function MyChannels({ myChannels }){
 	}
 
 	const handleLeave = ( channel_name ) => {
+		setCurrentChannel(-1)
 		socket.emit('LEAVE', JSON.stringify({ channel_name: channel_name, user_id: user.id }))
+	}
+
+	const handleShowChannel = (channel_name) => {
+		for (let i = 0; i < myChannels.length; i++) {
+			const chann = myChannels[i];
+			if (chann.channel_name === channel_name){
+				setCurrentChannel(i)
+				return
+			}
+		}
 	}
 
 	return (
 		<>
 			{myChannels.length > 0 ? (
-			<>
+			<div style={{overflowY: 'auto'}}>
 				<h4>My Channels</h4>
 				<ListGroup>
 					{myChannels.map((chann, i) => (
@@ -55,10 +66,10 @@ export default function MyChannels({ myChannels }){
 									<b > {chann.channel_name}   </b> 								
 								</div>
 								<div className="d-flex justify-content-between">
-									<a onClick={() => {}}  style={{cursor: 'pointer'}}  className="text-decoration-none"> Show </a>
-									{ chann.owners.map((value) => {
+									<a onClick={() => handleShowChannel(chann.channel_name)}  style={{cursor: 'pointer'}}  className="text-decoration-none"> Show </a>
+									{ chann.owners.map((value, index) => {
 											if (value === user.id)
-												return (<a onClick={() => { setEditChannel(chann.channel_name); setShow(true)  }}  style={{cursor: 'pointer'}}  className="text-decoration-none text-success"> Edit </a>)
+												return (<a key={index} onClick={() => { setEditChannel(chann.channel_name); setShow(true)  }}  style={{cursor: 'pointer'}}  className="text-decoration-none text-success"> Edit </a>)
 										return ''
 									})  }
 									
@@ -103,7 +114,7 @@ export default function MyChannels({ myChannels }){
 				</Button>
 				</Modal.Footer>
 			</Modal>
-			</>
+			</div>
 		
 		) : '' }
 			

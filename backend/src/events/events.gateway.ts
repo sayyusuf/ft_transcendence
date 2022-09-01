@@ -36,10 +36,10 @@ export class EventsGateway
     for (let i = 0; i < onlineUsers.length; i++) {
       if (client.id === onlineUsers[i].client.id){
         onlineUsers.splice(i, 1)
-         console.log('disconnected');
-        return
+        break
       }
     }
+    await this.handleGetAll(client, {})
   }
   handleConnection(client: any, ...args: any[]) {
     console.log('connected = ' + client.id);
@@ -128,22 +128,27 @@ export class EventsGateway
   commnad: string,
   param1: any,
   param2 : any
-}
+}asasdasd
 */
   @SubscribeMessage('ADMIN')
   async handleAdmin(client: any, data : any) : Promise<boolean>{
     let com : any = JSON.parse(data)
-    console.log(com)
     for (let i : number = 0; i < channels.length; i++){
       if (com.channel_name === await channels[i].getChannelName()){
         if (com.command === "change_password")
           await channels[i].changePassw(com.user_id, com.param1)
-        else if(com.command === "mute_user")
+        else if(com.command === "mute_user"){
           await channels[i].muteUser(com.user_id, com.param1);
+          setTimeout(async () => {
+             console.log('unmute')
+              await channels[i].unMuteUser(com.user_id, com.param1)
+              await this.handleGetAll(client, data)
+          }, 20000);
+        }     
         else if(com.command === "unmute_user")
           await channels[i].unMuteUser(com.user_id, com.param1);
         else if(com.command === "ban_user")
-          await channels[i].banUser(com.user_id, com.param1);
+           await channels[i].banUser(com.user_id, com.param1);
         else if(com.command === "unban_user")
           await channels[i].unBanUser(com.user_id, com.param1);
         else if (com.command === "change_status")
@@ -181,7 +186,6 @@ export class EventsGateway
 
   @SubscribeMessage('ONLINE')
   async handleOnline(client: any, data: any) {
-    console.log('online geldi')
     let com = JSON.parse(data);
     onlineUsers.push({ client:client, user_id: com.user_id })
     for (let i = 0; i < channels.length; i++) {
@@ -235,7 +239,6 @@ export class EventsGateway
     let com = JSON.parse(data);
 
     if (com.sender != '' && com.target != '') {
-      console.log(com);
       this.server.emit(com.target, data);
       return data;
     }

@@ -144,11 +144,10 @@ const Friends = () => {
 				setBlockArray(blocks)
 			})
 			.catch(() => console.log('error'))
-			socket.addEventListener(user.id, (data) => {
+		socket.addEventListener(user.id, (data) => {
 				const parsed = JSON.parse(data)
-				setMsgArr([...msgArr, parsed])
-				
-			})
+				setMsgArr([...msgArr, parsed])		
+		})
 	}, [msgArr,blockArray, refresh])
 
 	return (

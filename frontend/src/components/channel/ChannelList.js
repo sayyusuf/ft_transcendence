@@ -4,11 +4,11 @@ import { useAuth } from '../../context/AuthContext';
 import AllChannels from './AllChannels';
 import MyChannels from './MyChannels';
 
-export default function ChannelList( ){
+export default function ChannelList(  {myChannels, setMyChannels, setCurrentChannel, currentChannel} ){
 	const {user, socket} = useAuth()
 	const [show, setShow] = useState(false);
 	const [showPass, setShowPass] = useState(false)
-	const [myChannels, setMyChannels] = useState([])
+
 	const [allChannels, setAllChannels] = useState([])
 
 	const handleClose = () => {
@@ -58,7 +58,7 @@ export default function ChannelList( ){
 					<hr/>
 				</Col>
 				<Col className="col-12">
-					<MyChannels myChannels={myChannels} />
+					<MyChannels myChannels={myChannels}  setCurrentChannel={setCurrentChannel} />
 					<AllChannels myChannels={myChannels}  allChannels={allChannels} />
 				</Col>
 			</Row>

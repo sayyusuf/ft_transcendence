@@ -8,30 +8,31 @@ import '../css/channel.css'
 
 export default function Channel(){
 	const { socket } = useAuth()
-	const [currentChannel, setCurrentChannel] = useState({})
+	const [currentChannel, setCurrentChannel] = useState(-1)
+	const [myChannels, setMyChannels] = useState([])
+	const [channMsgArr, setChannMsgArr] = useState([])
 
-	useEffect(() => {
-		socket.on('FEEDBACK', (msg) => {
-			alert(msg)
-		})
-	}, [])
-
+	console.log(myChannels)
 	return(
 		<Card>
 			<Card.Body id="channel-card">
 				<Row className="border-between">
 					<Col  className="col-2 channel-col" style={{
-						borderRight: "1px solid #ccc"
+						borderRight: "1px solid #ccc",
+						overflowY:'auto'
 					}}>
-						<ChannelList setCurrentChannel={setCurrentChannel}  />
+						<ChannelList  myChannels={myChannels} setMyChannels={setMyChannels} currentChannel={currentChannel}  setCurrentChannel={setCurrentChannel}  />
 					</Col>
-					<Col className="col-7">
-						<ChannelChat />
+					<Col className="col-7" style={{overflowY:'auto'}}>
+						<ChannelChat myChannels={myChannels} setMyChannels={setMyChannels} currentChannel={currentChannel} channMsgArr={channMsgArr} setChannMsgArr={setChannMsgArr}/>
 					</Col>
 					<Col className="col-3" style={{
-						borderLeft: "1px solid #ccc"
+						borderLeft: "1px solid #ccc",
+						overflowY:'auto'
 					}}>
-						<ChannelMembers />
+						{myChannels[currentChannel] === undefined ? '' : (
+							<ChannelMembers myChannels={myChannels} currentChannel={currentChannel}  />
+						)}				
 					</Col>
 				</Row>
 			</Card.Body>		

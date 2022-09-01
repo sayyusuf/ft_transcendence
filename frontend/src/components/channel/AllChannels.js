@@ -14,11 +14,11 @@ export default function AllChannels({ allChannels, myChannels }){
 	useEffect(() => {
 		socket.on('JOIN_STATUS', (stat) => {
 			if (stat === true){
-				alert(`Joined to ${joinName} successfully`)
+				alert(`Joined successfully`)
 				handleClose()			
 			}
 			else{
-				alert('Password is incorrect')
+				alert(`Joining failed`)
 			}
 		})
 	}, [])
@@ -67,7 +67,7 @@ export default function AllChannels({ allChannels, myChannels }){
 	}
 
 	return (
-		<>
+		<div>
 			{channs.length > 0 ? (
 			<>
 				<h4>All Channels</h4>
@@ -123,7 +123,7 @@ export default function AllChannels({ allChannels, myChannels }){
 				</Modal.Footer>
 			</Modal>
 
-		</>
+		</div>
 		
 	)
 	

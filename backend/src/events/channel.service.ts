@@ -53,7 +53,7 @@ export class ChannelService {
     channel_status: number;
     password: string;
     owners: number[];
-    banned_users: number[];
+    banned_users: any[];
   };
 
   private socket: any;
@@ -63,17 +63,18 @@ export class ChannelService {
   constructor(data: any) {
     this.data = data;
 
-    this.socket = io('ws://localhost:3000');
+    this.socket = io(`http://localhost:3334`);
+    console.log(`consturcotr`, this.socket)
     this.socket.addEventListener(this.data.channel_id, (data) => {
-      this.sendAll(data);
+       this.sendAll(data);
     });
   }
 
-  sendAll(data: any) {
+  async sendAll(data: any) {
     let com = JSON.parse(data);
-    if (!this.isInChannel(com.sender)) return false;
-    if (this.isBanned(com.sender)) return false;
-    if (this.isMuted(com.sender)) return false;
+    if (await this.isInChannel(com.sender) === false) return false;
+    if (await this.isBanned(com.sender)) return false;
+    if (await this.isMuted(com.sender)) return false;
 
     for (let i = 0; i < this.data.users.length; i++) {
       if (this.data.users[i].is_online === true) {
@@ -102,8 +103,26 @@ export class ChannelService {
 
 
   async getInfo() : Promise<any>{
-    const temp = this.data
-    temp.users.map((user) => delete user.socket)
+    const mydata = this.data
+    const temp = {
+        channel_name: mydata.channel_name,
+      channel_id: mydata.channel_id,
+      users: [],
+      channel_status: mydata.channel_status,
+      password: mydata.password,
+      owners: mydata.owners,
+      banned_users: mydata.banned_users
+    }
+    for (let i = 0; i < this.data.users.length; i++) {
+      const elem = this.data.users[i];
+      temp.users.push({
+        user_id: elem.user_id,
+        user_nick: elem.user_nick,
+        is_owner: elem.is_owner,
+        is_online: elem.is_online,
+        is_muted: elem.is_muted
+      })
+    }
     return temp
   }
 
@@ -149,9 +168,13 @@ export class ChannelService {
   }
 
   async addOwner(prev_owner: number, new_owner: number): Promise<boolean> {
-    if (this.isOwner(prev_owner)) {
-      if (!this.isOwner(new_owner)) {
+    if (await this.isOwner(prev_owner)) {
+      if (await this.isOwner(new_owner) === false) {
         this.data.owners.push(new_owner);
+        for (let i = 0; i < this.data.users.length; i++){
+          if (this.data.users[i].user_id === new_owner)
+            this.data.users[i].is_owner = true;
+        }
         return true;
       }
     }
@@ -159,8 +182,11 @@ export class ChannelService {
   }
 
   async setOffline(client: any) {
-    for (let i = 0; i < this.data.users.length; i++) {
+    //console.log('Client ===>>>', client)
+   // console.log('User ====>>>', this.data.users)
+    for (let i = 0; i < this.data.users.length; i++) {  
       if (this.data.users[i].is_online && undefined !== this.data.users[i].socket  && client.id === this.data.users[i].socket.id) {
+        console.log('offline yapildi')
         this.data.users[i].is_online = false;
         this.data.users[i].socket = undefined;
         return;
@@ -173,6 +199,7 @@ export class ChannelService {
       if (user_id === this.data.users[i].user_id) {
         this.data.users[i].is_online = true;
         this.data.users[i].socket = client;
+        console.log(this.data.users[i])
         return;
       }
     }
@@ -215,20 +242,20 @@ export class ChannelService {
 
   async isBanned(user_id: number): Promise<boolean> {
     for (let i: number = 0; i < this.data.banned_users.length; i++) {
-      if (user_id === this.data.banned_users[i]) return true;
+      if (user_id === this.data.banned_users[i].user_id) return true;
     }
     return false;
   }
 
   async banUser(user_id: number, banned_id: number): Promise<boolean> {
-    if (!this.isInChannel(user_id)) return false;
-    if (!this.isInChannel(banned_id)) return false;
-    if (this.isOwner(banned_id)) return false;
-    if (!this.isOwner(user_id)) return false;
+    if (await this.isInChannel(user_id) === false) return false;
+    if (await this.isInChannel(banned_id) === false) return false;
+    if (await this.isOwner(banned_id)) return false;
+    if (await this.isOwner(user_id) === false) return false;
 
     for (let i = 0; i < this.data.users.length; i++) {
       if (banned_id === this.data.users[i].user_id){
-          this.data.banned_users.push(this.data.users[i].user_id);
+          this.data.banned_users.push({user_id: this.data.users[i].user_id, user_nick: this.data.users[i].user_nick});
           this.data.users.splice(i, 1);
           return true
       }
@@ -237,12 +264,12 @@ export class ChannelService {
   }
 
   async unBanUser(user_id: number, banned_id: number): Promise<boolean> {
-    if (!this.isInChannel(user_id)) return false;
-    if (!this.isBanned(banned_id)) return false;
-    if (!this.isOwner(user_id)) return false;
+    if (await this.isInChannel(user_id) === false) return false;
+    if (await this.isBanned(banned_id) === false) return false;
+    if (await this.isOwner(user_id) === false) return false;
 
     for (let i = 0; i < this.data.banned_users.length; i++) {
-      if (banned_id === this.data.banned_users[i]){
+      if (banned_id === this.data.banned_users[i].user_id){
           this.data.banned_users.splice(i, 1);
           return true;
       }
@@ -252,29 +279,30 @@ export class ChannelService {
 
 
   async muteUser(user_id: number, muted_id: number): Promise<boolean> {
-    if (!this.isInChannel(user_id)) return false;
-    if (!this.isInChannel(muted_id)) return false;
-    if (this.isOwner(muted_id)) return false;
-    if (!this.isOwner(user_id)) return false;
+    if (await this.isInChannel(user_id) === false) return false;
+    if (await this.isInChannel(muted_id) === false) return false;
+    if (await this.isOwner(muted_id)) return false;
+    if (await this.isOwner(user_id) === false) return false;
 
     for (let i = 0; i < this.data.users.length; i++) {
       if (muted_id === this.data.users[i].user_id)
         this.data.users[i].is_muted = true;
     }
-    setInterval(() => this.unMuteUser(user_id, muted_id), 10000);
+    //setInterval(() => this.unMuteUser(user_id, muted_id), 10000);
   }
 
 
 
-  unMuteUser(user_id: number, unmuted_id: number) {
-    if (!this.isInChannel(user_id)) return false;
-    if (!this.isOwner(user_id)) return false;
-    if (!this.isInChannel(unmuted_id)) return false;
+  async unMuteUser(user_id: number, unmuted_id: number) {
+    if (await this.isInChannel(user_id) === false) return false;
+    if (await this.isOwner(user_id) === false) return false;
+    if (await this.isInChannel(unmuted_id) === false) return false;
 
     for (let i = 0; i < this.data.users.length; i++) {
-      if (unmuted_id === this.data.users[i].user_id)
+      if (unmuted_id === this.data.users[i].user_id){
         this.data.users[i].is_muted = false;
         return true;
+      } 
     }
     return false;
   }
