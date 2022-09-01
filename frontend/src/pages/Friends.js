@@ -51,8 +51,7 @@ const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr, opponent }) =>
 								<Button variant="primary" onClick={handleBtn}  id="submit-btn">Send</Button>
 								<Button style={{marginLeft: '5px'}} variant="danger" onClick={() => setActiveChat(false)}>x</Button>
 							</Col>
-						</Row>
-							
+						</Row>					
 					</div>
 				</div>
 			</div>

@@ -17,12 +17,10 @@ const Authorize =  () => {
 		.then(response => {
 			console.log(response.data)
 			setUser(response.data)
-			//navigate('/')
+			navigate('/')
 		})
 		.catch(() => navigate('/login'))
-	return (
-		<Navigate to="/" />
-	)
+
 }
 
 export default Authorize

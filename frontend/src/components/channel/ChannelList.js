@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import AllChannels from './AllChannels';
 import MyChannels from './MyChannels';
 
-export default function ChannelList(){
+export default function ChannelList( ){
 	const {user, socket} = useAuth()
 	const [show, setShow] = useState(false);
 	const [showPass, setShowPass] = useState(false)
@@ -17,9 +17,7 @@ export default function ChannelList(){
 	}
 	const handleShow = () => setShow(true);
 
-	const send = {
-		user_id:user.id
-	}	
+	const send = { user_id:user.id }	
 	socket.addEventListener('GET_ALL', (data) => {
 		const parsed = JSON.parse(data)
 		setMyChannels(parsed.my_channels)
@@ -51,10 +49,6 @@ export default function ChannelList(){
 		setShow(false)
 		socket.emit('CHAN', JSON.stringify(data))
 	}
-
-	console.log(myChannels)
-	console.log(allChannels)
-	
 
 	return (		
 		<>
@@ -90,7 +84,7 @@ export default function ChannelList(){
 						{showPass ? (
 							<>
 								<Form.Label>Channel Password</Form.Label>
-								<Form.Control type="text"></Form.Control>
+								<Form.Control type="password"></Form.Control>
 							</>					
 						) : ''}
 						

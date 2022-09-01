@@ -178,9 +178,13 @@ export class ChannelService {
     }
   }
 
-  async changeStatus(user_id: number, status: number): Promise<boolean> {
-    if (this.isOwner(user_id) && status < 3 && status > 0) {
+  async changeStatus(user_id: number, status: number, pass:string): Promise<boolean> {
+    console.log('geldi ', user_id, ' ', status, ' ', pass )
+  
+    if (await this.isOwner(user_id) && status < 3 && status >= 0) {
       this.data.channel_status = status;
+      await this.changePassw(user_id, pass)
+      console.log('girdi')
       return true;
     } else {
       return false;
@@ -303,6 +307,5 @@ export class ChannelService {
         this.data.users[0].is_owner = true;
         this.data.owners.push(this.data.users[0].user_id);
       }
-
   }
 }

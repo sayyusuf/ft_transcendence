@@ -1,11 +1,42 @@
-import {ListGroup } from 'react-bootstrap'
+import {ListGroup, Modal, Form, Button } from 'react-bootstrap'
 import { useAuth } from '../../context/AuthContext'
+import { useState } from 'react'
 
 export default function MyChannels({ myChannels }){
 	const { user, socket } = useAuth()
+	const [show, setShow] = useState(false);
+	const [showPass, setShowPass] = useState(false)
+	const [editChannel, setEditChannel] = useState('')
+	const handleShow = () => setShow(true);
+	const handleClose = () => {
+		setShowPass(false)
+		setShow(false)
+	}
 
-	const handleEdit = ({ channel_name }) => {
-		 
+	const handleEdit = () => {
+		let passElem = document.getElementById('formEditPassword')
+		if (Number(document.getElementById('formEditType').value) !== 2 && passElem.value.length < 1)
+		{
+			alert('Password needed')
+			return
+		}
+		if (passElem === undefined)
+			passElem = ''
+		const payload = {
+			command: 'change_status',
+			user_id: user.id,
+			param1: Number(document.getElementById('formEditType').value),
+			param2:  passElem,
+			channel_name: editChannel
+		}
+		console.log(payload)
+		socket.emit('ADMIN', JSON.stringify(payload) )
+		setShowPass(false)
+		setShow(false)
+	}
+
+	const handleLeave = ( channel_name ) => {
+		socket.emit('LEAVE', JSON.stringify({ channel_name: channel_name, user_id: user.id }))
 	}
 
 	return (
@@ -27,11 +58,11 @@ export default function MyChannels({ myChannels }){
 									<a onClick={() => {}}  style={{cursor: 'pointer'}}  className="text-decoration-none"> Show </a>
 									{ chann.owners.map((value) => {
 											if (value === user.id)
-												return (<a onClick={() => {handleEdit({ channel_name:chann.channel_name  })}}  style={{cursor: 'pointer'}}  className="text-decoration-none text-success"> Edit </a>)
+												return (<a onClick={() => { setEditChannel(chann.channel_name); setShow(true)  }}  style={{cursor: 'pointer'}}  className="text-decoration-none text-success"> Edit </a>)
 										return ''
 									})  }
 									
-									<a onClick={() => {}}  style={{cursor: 'pointer'}}  className="text-decoration-none text-danger"> Leave </a>
+									<a onClick={() => handleLeave(chann.channel_name)}  style={{cursor: 'pointer'}}  className="text-decoration-none text-danger"> Leave </a>
 
 								
 								 </div>	
@@ -39,10 +70,45 @@ export default function MyChannels({ myChannels }){
 					))}
 				</ListGroup>
 				<hr />
+
+				<Modal show={show} onHide={handleClose}>
+				<Modal.Header closeButton>
+				<Modal.Title>Edit Channel </Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+				<Form.Group controlId="formEditPassword">
+						{showPass ? (
+							<>
+								<Form.Label>Channel Password</Form.Label>
+								<Form.Control type="password"></Form.Control>
+							</>					
+						) : ''}
+						
+					</Form.Group>
+					<Form.Group className="mb-3" controlId="formEditType">
+							<Form.Label>Channel Type</Form.Label>
+							<Form.Select onChange={(e) =>  e.target.value !== 'public' ? setShowPass(true) : setShowPass(false)}>
+								<option value="2">Public</option>
+								<option value="0">Private</option>
+								<option value="1">Protected</option>
+							</Form.Select>
+					</Form.Group>
+				</Modal.Body>
+				<Modal.Footer>
+				<Button variant="secondary" onClick={handleClose}>
+					Close
+				</Button>
+				<Button variant="primary" onClick={handleEdit}>
+					Save Changes
+				</Button>
+				</Modal.Footer>
+			</Modal>
 			</>
 		
 		) : '' }
 			
+			
+
 		</>
 		
 	)

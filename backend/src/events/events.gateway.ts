@@ -110,7 +110,6 @@ export class EventsGateway
           password: com.password,
         });
         if (res === false) {
-          console.log('false yolladim')
           client.emit('JOIN_STATUS', false)
           return false;
         } else {
@@ -133,12 +132,12 @@ export class EventsGateway
 */
   @SubscribeMessage('ADMIN')
   async handleAdmin(client: any, data : any) : Promise<boolean>{
-    let com : any = JSON.stringify(data)
+    let com : any = JSON.parse(data)
+    console.log(com)
     for (let i : number = 0; i < channels.length; i++){
-      if (com.channel_name === channels[i].getChannelName()){
-
+      if (com.channel_name === await channels[i].getChannelName()){
         if (com.command === "change_password")
-          await channels[i].changePassw(com.user_id, com.param1);
+          await channels[i].changePassw(com.user_id, com.param1)
         else if(com.command === "mute_user")
           await channels[i].muteUser(com.user_id, com.param1);
         else if(com.command === "unmute_user")
@@ -148,21 +147,20 @@ export class EventsGateway
         else if(com.command === "unban_user")
           await channels[i].unBanUser(com.user_id, com.param1);
         else if (com.command === "change_status")
-          await channels[i].changeStatus(com.user_id, com.param1);
+          await channels[i].changeStatus(Number(com.user_id), Number(com.param1), com.param2)
         else if (com.command === "add_admin")
           await channels[i].addOwner(com.user_id, com.param1);
        await this.handleGetAll(client, data)  
         return (true)
       }
     }
+    client.emit('FEEDBACK', "Command not found")
     return false;
   }
 
 
   @SubscribeMessage('GET_ALL')
   async handleGetAll(client: any, data: any) {
-    let com = JSON.parse(data);
-   
     const all = []
     for (let index = 0; index < channels.length; index++) {
       all.push(await channels[index].getInfoLow())
@@ -224,10 +222,12 @@ export class EventsGateway
   async handleLeave(client: any, data: any) {
     let com = JSON.parse(data);
     for (let i = 0; i < channels.length; i++) {
-      if (com.channel_name === channels[i].getChannelName()) {
-        channels[i].leaveChannel(com.user_id);
+      if (com.channel_name === await channels[i].getChannelName()) {
+        await channels[i].leaveChannel(com.user_id);
       }
     }
+    console.log('bad left')
+    await this.handleGetAll(client, data)
   }
 
   @SubscribeMessage('PRIV')
