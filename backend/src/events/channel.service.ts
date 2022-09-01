@@ -159,7 +159,6 @@ export class ChannelService {
         this.data.owners.push(user.user_id);
       }
       this.data.users.push(user);
-      console.log('bad geldi')
       return true;
     }
     if (this.data.channel_status === 2) {
@@ -171,7 +170,6 @@ export class ChannelService {
       this.data.users.push(user);
       return true;
     }
-    console.log('false dondu en son')
     return false;
   }
 
@@ -190,11 +188,8 @@ export class ChannelService {
   }
 
   async setOffline(client: any) {
-    //console.log('Client ===>>>', client)
-   // console.log('User ====>>>', this.data.users)
     for (let i = 0; i < this.data.users.length; i++) {  
       if (this.data.users[i].is_online && undefined !== this.data.users[i].socket  && client.id === this.data.users[i].socket.id) {
-        console.log('offline yapildi')
         this.data.users[i].is_online = false;
         this.data.users[i].socket = undefined;
         return;
@@ -207,7 +202,6 @@ export class ChannelService {
       if (user_id === this.data.users[i].user_id) {
         this.data.users[i].is_online = true;
         this.data.users[i].socket = client;
-        console.log(this.data.users[i])
         return;
       }
     }

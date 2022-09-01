@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Row, Col, Button, Form } from 'react-bootstrap'
 import { useAuth } from '../../context/AuthContext'
 
@@ -7,6 +7,11 @@ export default function ChannelChat({ myChannels, currentChannel }){
 	const [msg, setMsg] = useState('')
 
 	const handleSend = () => {
+		if (msg.length < 1){
+			alert('Your message is empty!')
+			return
+		}
+
 		const payload = {
 			target: myChannels[currentChannel].channel_id,
 			sender: user.id,
@@ -14,7 +19,18 @@ export default function ChannelChat({ myChannels, currentChannel }){
 			data: msg
 		}
 		socket.emit('PRIV', JSON.stringify(payload))
+		setMsg('')
 	}
+
+	useEffect(() => {
+		const input = document.getElementById('msg-input')
+		input.addEventListener("keypress", function(event) {
+			if (event.key === "Enter") {
+			  event.preventDefault();
+			  document.getElementById("submit-btn").click();
+			}
+		})
+	}, [])
 
 	const filterMessage = msgArr.filter((msg) => msg.sender === myChannels[currentChannel].channel_id);
 	return (

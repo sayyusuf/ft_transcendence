@@ -140,7 +140,6 @@ export class EventsGateway
         else if(com.command === "mute_user"){
           await channels[i].muteUser(com.user_id, com.param1);
           setTimeout(async () => {
-             console.log('unmute')
               await channels[i].unMuteUser(com.user_id, com.param1)
               await this.handleGetAll(client, data)
           }, 20000);
@@ -230,7 +229,6 @@ export class EventsGateway
         await channels[i].leaveChannel(com.user_id);
       }
     }
-    console.log('bad left')
     await this.handleGetAll(client, data)
   }
 
@@ -250,7 +248,6 @@ export class EventsGateway
     const com = JSON.parse(data);
 
     if (com.sender != '' && com.target != '') {
-      console.log(com);
       this.server.emit(com.target, data);
       return data;
     }

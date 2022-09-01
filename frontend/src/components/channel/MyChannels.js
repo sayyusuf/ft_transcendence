@@ -26,7 +26,7 @@ export default function MyChannels({ myChannels, setCurrentChannel }){
 			command: 'change_status',
 			user_id: user.id,
 			param1: Number(document.getElementById('formEditType').value),
-			param2:  passElem,
+			param2:  passElem.value,
 			channel_name: editChannel
 		}
 		console.log(payload)

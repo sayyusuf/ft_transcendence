@@ -11,7 +11,15 @@ const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr, opponent }) =>
 	const [msg, setMsg] = useState('')
 	const {user, socket} = useAuth()
 
-
+	useEffect(() => {
+		const input = document.getElementById('msg-input')
+		input.addEventListener("keypress", function(event) {
+			if (event.key === "Enter") {
+				event.preventDefault();
+				document.getElementById("submit-btn").click();
+			}
+		})
+	}, [])
    	const filterMessage = msgArr.filter((msg) => msg.sender === activeChatUser || (msg.sender === user.id &&  msg.target === activeChatUser));
 
 	const handleBtn = () => {
@@ -21,7 +29,7 @@ const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr, opponent }) =>
 		setMsg('')
 		socket.emit('PRIV', JSON.stringify(pack))
 	}
-
+	
 	return (
 		<>
 			<div id="chat-box" style={{
