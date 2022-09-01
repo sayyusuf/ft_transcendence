@@ -154,6 +154,12 @@ export class EventsGateway
           await channels[i].changeStatus(Number(com.user_id), Number(com.param1), com.param2)
         else if (com.command === "add_admin")
           await channels[i].addOwner(com.user_id, com.param1);
+        else if (com.command === "invite_game")
+          channels[i].inviteGame(com.user_id, com.param1);
+        else if (com.command === "accept_invite"){
+          channels[i].acceptInvite(com.user_id, com.param1);
+        }
+          
        await this.handleGetAll(client, data)  
         return (true)
       }

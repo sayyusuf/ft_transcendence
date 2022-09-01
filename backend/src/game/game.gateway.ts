@@ -372,7 +372,6 @@ handleMessage(client: Socket, match_id: number) {
                 if(waiting_room[i] == client.id)
                 waiting_room.splice(i, 1);
             }
-
             matches[index].push(client.id);
           }
       }

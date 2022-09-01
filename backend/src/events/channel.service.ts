@@ -57,7 +57,7 @@ export class ChannelService {
   };
 
   private socket: any;
-
+  private game_list = []
   private socket_flag: any;
 
   constructor(data: any) {
@@ -141,6 +141,49 @@ export class ChannelService {
     })
   }
 
+  inviteGame(user_id:number, invited_id:number){
+      // onceden listede olup olmadigini kontrol et
+      this.game_list.push({ user_id:user_id, invited_id:invited_id, is_accepted:false })
+      for (let i = 0; i < this.data.users.length; i++) {
+        const user = this.data.users[i];
+        if (user.user_id === invited_id){
+          for (let j = 0; j < this.data.users.length; j++) {
+            const elem = this.data.users[j];
+            if (elem.user_id === user_id){
+              user.socket.emit('GET_INVITE', JSON.stringify({ user_id:user_id, user_nick: elem.user_nick, channel_name: this.data.channel_name }))
+              setTimeout(() => {
+                 for (let h = 0; h < this.game_list.length; h++) {
+                   const game = this.game_list[h];
+                   if (game.user_id === user_id){
+                       for (let e = 0; e < this.data.users.length; e++) {
+                         const u = this.data.users[e];
+                         if (u.user_id === user_id || u.user_id === invited_id)
+                              u.socket.emit('INVITE_RES', false)
+                       }
+                   }
+                 }
+              }, 15000);
+            }
+          }        
+        }
+      }
+  }
+
+  acceptInvite(user_id:number, opponent_id:number){
+    for (let i = 0; i < this.game_list.length; i++) {
+      const game = this.game_list[i];
+      if (game.invited_id === user_id && game.user_id === opponent_id){
+        game.is_accepted = true
+        for (let e = 0; e < this.data.users.length; e++) {
+            const u = this.data.users[e];
+            if (u.user_id === user_id || u.user_id === opponent_id)
+              u.socket.emit('INVITE_RES', game.is_accepted)
+        }      
+        return true
+      }
+    }
+    return false
+  }
 
   async addUser(user: any): Promise<boolean> {
     if (await this.isInChannel(user.user_id)) {
