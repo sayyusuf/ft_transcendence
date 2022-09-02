@@ -8,6 +8,7 @@ const Profile = () => {
 	const { user } = useAuth()
 	const [userData, setUserData] = useState(false)
 	const [matchData, setMatchData] = useState([])
+	const [achievementData, setAchievementData] = useState([])
 	const { id } = useParams()
 
 	console.log(id)
@@ -26,6 +27,11 @@ const Profile = () => {
 		axios.get(`${process.env.REACT_APP_API_URL}/user/get-matches/${id}`)
 		.then((res) => {
 			setMatchData(res.data)
+		})
+		axios.get(`${process.env.REACT_APP_API_URL}/user/get-achievements/${id}`)
+		.then((res) => {
+			console.log(achievementData)
+			setAchievementData(res.data)
 		})
 	}, [])
 	
@@ -71,9 +77,28 @@ const Profile = () => {
 								</Card.Body>
 							</Card>						
 						</Col>
-						<Col className="col-5">
-								<Card className="card-dark p-2" style={{height:'100%'}}>
+						<Col className="col-5" >
+								<Card className="card-dark p-2" style={{height:'284.66px', overflowY:'auto'}}>
 									<h4 className="text-center" style={{color: `${user.coalition_color}`}}>Achievements</h4>
+									<Row className="gy-1">
+										{achievementData.map((achieve, index) => {
+											return (
+												<>
+												<Col className="col-12" key={index}>
+													<Card>
+														<Card.Header>
+														{achieve.title}
+														</Card.Header>
+														<Card.Body>
+															{achieve.description}
+														</Card.Body>
+													</Card>
+												</Col>
+												</>
+												
+											)										
+										})}
+									</Row>
 								</Card>
 						</Col>
 						<Col className="col-12 mt-4">

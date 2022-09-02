@@ -68,6 +68,9 @@ let UserController = class UserController {
     async getMatchesById(id) {
         return await this.userService.getMatchesById(Number(id));
     }
+    async getAchievementsById(id) {
+        return await this.userService.getAchievementsById(Number(id));
+    }
     async changeUserStatus(id, status) {
         return await this.userService.changeStatusById(Number(id), Number(status));
     }
@@ -203,6 +206,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getMatchesById", null);
+__decorate([
+    (0, common_1.Get)('get-achievements/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getAchievementsById", null);
 __decorate([
     (0, common_1.Post)('set-status'),
     __param(0, (0, common_1.Body)('id')),

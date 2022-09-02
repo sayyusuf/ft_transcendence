@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext"
-import {drawText, drawRect, drawCircle, welcome_page} from "../game/canvas_functions"
+import {drawText, drawRect, welcome_page} from "../game/canvas_functions"
 import GameLogo from '../game/icons8-game-64.png'
-import {io} from 'socket.io-client'
 import axios from "axios"
 import { useNavigate } from 'react-router-dom'
 import handleGlobalUnload from '../unload'
-import { Form} from 'react-bootstrap'
+
 	// select canvas element
 const Canvas = () => {
 	
@@ -21,7 +20,7 @@ const Canvas = () => {
 const Game = ({ currentColor }) => {
 	const { user, socket } = useAuth()
 	const navigate = useNavigate()
-
+	
 	function unloadHandler(){
 		axios.post(`${process.env.REACT_APP_API_URL}/user/set-status`, {
 			id: user.id,
@@ -29,14 +28,13 @@ const Game = ({ currentColor }) => {
 		}).then(() => {})
 		socket.emit('connection', ['disconnect', user.id])
 	}
-	
 
-useEffect(() => {
+	useEffect(() => {
 		const canvas = document.getElementById("pong");
 		const c = canvas.getContext('2d');
 		
 		socket.emit('connection', ['connected', user.id])
-		if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
+		if (performance.navigation.type === performance.navigation.TYPE_RELOAD) {
 			socket.off("status");
 			socket.off("lobby");
 			socket.off("in_game");
@@ -75,7 +73,7 @@ useEffect(() => {
 
 		const statusHandle_function = (status_id) => {
 			console.log(status_id);
-			if(status_id[0] == 1){
+			if(status_id[0] === 1){
 				game_Start_flag = 0;
 				//c.clearRect(0, 0, canvas.width, canvas.height);
 				drawRect(0,0, canvas.width, canvas.height, 'white', c );
@@ -89,7 +87,7 @@ useEffect(() => {
 					status: 1
 				}).then(() => {})
 			}
-			else if(status_id[0] == 2) {			
+			else if(status_id[0] === 2) {			
 				socket.off("lobby_state");
 				socket.emit("join-room", status_id[2]);
 				if(!status_id[1])
@@ -107,7 +105,7 @@ useEffect(() => {
 					status: 2
 				}).then(() => {})
 			}
-			else if (status_id[0] == -1){
+			else if (status_id[0] === -1){
 				socket.off("status");
 				socket.off("lobby_state");
 				navigate('/')
@@ -115,8 +113,8 @@ useEffect(() => {
 		}
 
 		function check(e) {
-			if(game_Start_flag == 0) {
-				if(e.keyCode == 49) {
+			if(game_Start_flag === 0) {
+				if(e.keyCode === 49) {
 					if(lobby_data_local[0] > -1) {
 						socket.off("lobby_state");
 						socket.emit("join-room", lobby_data_local[0]);
@@ -127,7 +125,7 @@ useEffect(() => {
 					}
 				}
 
-				if(e.keyCode == 50) {
+				if(e.keyCode === 50) {
 					if(lobby_data_local[1] > -1) {
 						socket.off("lobby_state");
 						socket.emit("join-room", lobby_data_local[1]);
@@ -138,7 +136,7 @@ useEffect(() => {
 					}
 				}
 
-				if(e.keyCode == 51) {
+				if(e.keyCode === 51) {
 					if(lobby_data_local[2] > -1) {
 						socket.off("lobby_state");
 						socket.emit("join-room", lobby_data_local[2]);
@@ -149,7 +147,7 @@ useEffect(() => {
 					}
 				}
 			}
-			if(e.keyCode == 27 && game_Start_flag == 2) {
+			if(e.keyCode === 27 && game_Start_flag === 2) {
 				game_Start_flag = 0;
 				socket.emit("out-room", current_observerd_match_id);
 				socket.off("in_game");
@@ -157,7 +155,7 @@ useEffect(() => {
 				drawRect(0,0, canvas.width, canvas.height, 'white', c )
 				socket.on("status", statusHandle_function);
 			}
-			if(e.keyCode == 27 && game_Start_flag == 4) {
+			if(e.keyCode === 27 && game_Start_flag === 4) {
 				game_Start_flag = 0;
 				socket.emit("out-room", current_observerd_match_id);
 				socket.off("in_game");
@@ -173,7 +171,7 @@ useEffect(() => {
 		canvas.addEventListener("mousemove", getMousePos);
 
 		function getMousePos(evt){
-			if(game_Start_flag == 1) {
+			if(game_Start_flag === 1) {
 				let rect = canvas.getBoundingClientRect();
 				gameUser.y = evt.clientY - rect.top - gameUser.height/2;
 				socket.emit('user_move', gameUser.user_side, gameUser.y, gameUser.match_id);
@@ -188,14 +186,14 @@ useEffect(() => {
 
 		const render = (data) => {
 			console.log(data);
-			if(data == "died") {
+			if(data === "died") {
 				game_Start_flag = 0;
 				socket.on("status", statusHandle_function);
 				socket.off("in_game");
 				c.clearRect(0, 0, canvas.width, canvas.height);
 				return
 			}
-			if(data == "stop") {
+			if(data === "stop") {
 				socket.off("in_game");
 				c.clearRect(0, 0, canvas.width, canvas.height);
 				drawText("Game Finished or one of gameUser disconnected!", 40, canvas.height/2, 'black', c , "30px Arial");
@@ -203,7 +201,7 @@ useEffect(() => {
 				game_Start_flag = 4;
 				return
 			}
-			if(data == "won") {
+			if(data === "won") {
 				socket.off("in_game");
 				c.clearRect(0, 0, canvas.width, canvas.height);
 				drawText("You Won !", 40, canvas.height/2, 'black', c , "30px Arial");
@@ -215,7 +213,7 @@ useEffect(() => {
 				}).then(() => {})
 				return
 			}
-			if(data == "loss") {
+			if(data === "loss") {
 				socket.off("in_game");
 				c.clearRect(0, 0, canvas.width, canvas.height);
 				drawText("You Lost !", 40, canvas.height/2, 'black', c , "30px Arial");
@@ -276,6 +274,7 @@ useEffect(() => {
 			window.addEventListener('unload', handleGlobalUnload)
 		}
 	}, [])
+	
 	return (
 		<> 
 			<canvas style={{

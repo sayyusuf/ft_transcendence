@@ -31,8 +31,16 @@ model User {
   friends Int[]
   blockeds Int[]
   blockedBy Int[]
+  achievements Achievements[]
 }
 
+model Achievements{
+  id    Int     @id @default(autoincrement())
+  title String
+  description String
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+}
 
 model MatchHistory{
   id Int      @id @default(autoincrement())

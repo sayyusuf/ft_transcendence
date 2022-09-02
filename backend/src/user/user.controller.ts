@@ -107,6 +107,11 @@ export class UserController {
 		return await this.userService.getMatchesById(Number(id))
 	}
 
+	@Get('get-achievements/:id')
+	async getAchievementsById(@Param('id') id){
+		return await this.userService.getAchievementsById(Number(id))
+	}
+
 	@Post('set-status')
 	async changeUserStatus(@Body('id') id, @Body('status') status){
 		return await this.userService.changeStatusById(Number(id), Number(status))

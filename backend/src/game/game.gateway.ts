@@ -213,6 +213,60 @@ win_loss_function(info) {
             level:  (0.5 - (res.win * 0.02)) < 0.1 ? 0.1 + res.level  :  (0.5 - (res.win * 0.02)) + res.level
           }
         }).then(() => {})
+        if (res.win + 1 === 1){
+          db.achievements.create({
+            data:{
+              userId:res.id,
+              title: 'First Blood',
+              description:'Congrats! You got your first win'
+            }
+          }).then(() => {})
+        }
+        else if (res.win + 1 === 15){
+          db.achievements.create({
+            data:{
+              userId:res.id,
+              title: 'Monster',
+              description:'You won at least 10 game'
+            }
+          }).then(() => {})
+        }
+        if ((0.5 - (res.win * 0.02)) < 0.1 ? 0.1 + res.level  :  (0.5 - (res.win * 0.02)) + res.level >= 1.0){
+          db.achievements.create({
+            data:{
+              userId:res.id,
+              title: 'Beginner',
+              description:'You reached level 1'
+            }
+          }).then(() => {})
+        }
+        if ((0.5 - (res.win * 0.02)) < 0.1 ? 0.1 + res.level  :  (0.5 - (res.win * 0.02)) + res.level >= 5.0){
+          db.achievements.create({
+            data:{
+              userId:res.id,
+              title: 'Intermediate',
+              description:'You reached level 5'
+            }
+          }).then(() => {})
+        }
+         if (res.win  + res.lose + 1 >= 20){
+          db.achievements.create({
+            data:{
+              userId:res.id,
+              title: 'Hardcore Player',
+              description:'You played 20 games'
+            }
+          }).then(() => {})
+        }
+        if (res.win  + res.lose + 1 >= 10){
+          db.achievements.create({
+            data:{
+              userId:res.id,
+              title: 'Enjoyer',
+              description:'You played 10 games'
+            }
+          }).then(() => {})
+        }
       })
       loser.then((res)=> {
         db.user.update({
@@ -440,7 +494,6 @@ handleMessage(client: Socket, match_id: number) {
         matches[i].push(client.id);
       }
     }
-
 
     
   }

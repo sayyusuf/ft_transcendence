@@ -415,7 +415,6 @@ let UserService = class UserService {
         return { nick: nick };
     }
     async getMatchesById(id) {
-        console.log('id =====>  ', id);
         const userExist = await this.getUserById(id);
         if (!userExist)
             throw new common_1.HttpException('User not exist', common_1.HttpStatus.FORBIDDEN);
@@ -444,6 +443,17 @@ let UserService = class UserService {
             return jsonCopy;
         });
         return Promise.all(retData);
+    }
+    async getAchievementsById(id) {
+        const userExist = await this.getUserById(id);
+        if (!userExist)
+            throw new common_1.HttpException('User not exist', common_1.HttpStatus.FORBIDDEN);
+        const achievements = await this.context.achievements.findMany({
+            where: {
+                userId: id
+            }
+        });
+        return achievements;
     }
     async changeStatusById(id, status) {
         const userExist = await this.getUserById(id);

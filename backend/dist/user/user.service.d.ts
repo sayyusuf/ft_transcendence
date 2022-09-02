@@ -36,5 +36,6 @@ export declare class UserService {
         nick: any;
     }>;
     getMatchesById(id: any): Promise<any[]>;
+    getAchievementsById(id: any): Promise<import(".prisma/client").Achievements[]>;
     changeStatusById(id: any, status: any): Promise<import(".prisma/client").User>;
 }
