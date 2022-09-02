@@ -4,7 +4,8 @@ import { Row, Col, Form, Button, Modal } from "react-bootstrap"
 import { useAuth } from "../context/AuthContext"
 
 
-export default function Settings() {
+
+export default function Settings({ currentColor, setColor }) {
 	const { user, setUser } = useAuth()
 	const [nickname, setNickname] = useState(user.nick)
 	const [show, setShow] = useState(false);
@@ -33,6 +34,11 @@ export default function Settings() {
 			.then(res => setQRData(res.data))
 		}
 	},[factorState])
+
+	const changeColor = () => {
+		const new_color = document.querySelector('input[name="color"]:checked').value
+		localStorage.setItem('game_color', new_color)
+	}
 
 	const changeFactorHandle = () => {
 		const url = `${process.env.REACT_APP_API_URL}/user/verify`;
@@ -171,6 +177,41 @@ export default function Settings() {
 					<Button disabled={!isAvatarValid} onClick={changeAvatarHandle} style={{marginTop: '30px'}} variant="success">
 						Change Avatar
 					</Button>
+				</Col>
+				<Col className="col-12">
+				<div style={{fontSize:'20px'}}>
+				<b>Select Background Theme:  </b>
+				<Form.Check
+					inline 
+					checked={localStorage.getItem('game_color') === 'black'} 
+					label="Classic"
+					name="color"
+					type="radio"
+					value="black"
+					id={`inline-1`}	
+					onChange={changeColor}			
+				/>
+				<Form.Check
+					inline
+					label="Green"
+					checked={localStorage.getItem('game_color') === 'green'} 
+					value="green"
+					name="color"
+					type="radio"
+					id={`inline-2`}
+					onChange={changeColor}			
+				/>
+				<Form.Check
+					inline
+					label="Red"
+					checked={localStorage.getItem('game_color') === 'red'} 
+					value="red"
+					name="color"
+					type="radio"
+					id={`inline-3`}
+					onChange={changeColor}			
+				/>
+			</div>
 				</Col>
 				<Col className="col-12">
 					{!factorState ? (

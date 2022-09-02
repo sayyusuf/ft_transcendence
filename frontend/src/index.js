@@ -7,6 +7,8 @@ import handleGlobalUnload from './unload'
 
 window.onunload = handleGlobalUnload
 
+localStorage.setItem('game_color', 'black')
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>

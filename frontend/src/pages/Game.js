@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext"
 import {drawText, drawRect, drawCircle, welcome_page} from "../game/canvas_functions"
 import GameLogo from '../game/icons8-game-64.png'
@@ -6,6 +6,7 @@ import {io} from 'socket.io-client'
 import axios from "axios"
 import { useNavigate } from 'react-router-dom'
 import handleGlobalUnload from '../unload'
+import { Form} from 'react-bootstrap'
 	// select canvas element
 const Canvas = () => {
 	
@@ -17,7 +18,7 @@ const Canvas = () => {
 }
 
 
-const Game = () => {
+const Game = ({ currentColor }) => {
 	const { user, socket, setInGame } = useAuth()
 	const navigate = useNavigate()
 
@@ -28,7 +29,7 @@ const Game = () => {
 		}).then(() => {})
 		socket.emit('connection', ['disconnect', user.id])
 	}
-
+	
 
 useEffect(() => {
 		const canvas = document.getElementById("pong");
@@ -227,7 +228,7 @@ useEffect(() => {
 				return
 			}
 			if(game_Start_flag) {
-				drawRect(0,0,canvas.width,canvas.height,"black",c);
+				drawRect(0,0,canvas.width,canvas.height,currentColor,c);
 				// console.log(ball_colors[gameUser.ball_color]);
 				drawCircle_2(data.ball_x, data.ball_y, data.radius);
 				drawRect(0, data.user_left_y, gameUser.width, gameUser.height, gameUser.color, c);
@@ -276,17 +277,20 @@ useEffect(() => {
 		}
 	}, [])
 	return (
-		<canvas style={{
-			border: `2px solid #FFF`,
-            position: `absolute`,
-            margin :`auto`,
-            top:`0`,
-            right:`0`,
-            left:`0`,
-            bottom:`0`
-		}} id="pong" width="800" height="600">
-			<Canvas />
-		</canvas>
+		<> 
+			<canvas style={{
+					border: `2px solid #FFF`,
+					position: `absolute`,
+					margin :`auto`,
+					top:`0`,
+					right:`0`,
+					left:`0`,
+					bottom:`0`
+			}} id="pong" width="800" height="600">
+				<Canvas />
+			</canvas>
+		</>
+	
 	)
 }
 

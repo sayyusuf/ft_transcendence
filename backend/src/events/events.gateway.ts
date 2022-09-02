@@ -220,33 +220,7 @@ export class EventsGateway
     await this.handleGetAll(client, data)
   }
 
-  /*
-    data {
-      user_id: number,
-      user_nick: string,
-      channel_name: string,
-      password: string
-    }
-    */
-/*
 
-    {
-      socket: client,
-      user_id: com.user_id,
-      user_nick: com.user_nick,
-      is_owner: true,
-      is_muted: false,
-      is_online: true,
-    },
-*/
-
-
-  /*
-  data {
-    user_id: number,
-    channel_name: string,
-  }
-  */
   @SubscribeMessage('LEAVE')
   async handleLeave(client: any, data: any) {
     let com = JSON.parse(data);
