@@ -31,6 +31,7 @@ export declare class UserService {
         nick: any;
     }>;
     getBlocks(id: any): Promise<any[]>;
+    getBlockedBys(id: any): Promise<any[]>;
     removeBlock(id: any, nick: any): Promise<{
         nick: any;
     }>;

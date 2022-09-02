@@ -59,6 +59,9 @@ let UserController = class UserController {
     async getBlocks(id) {
         return await this.userService.getBlocks(id);
     }
+    async getBlockedBys(id) {
+        return await this.userService.getBlockedBys(id);
+    }
     async removeBlock(id, nick) {
         return await this.userService.removeBlock(Number(id), nick);
     }
@@ -178,6 +181,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getBlocks", null);
+__decorate([
+    (0, common_1.Post)('get-blocked-bys'),
+    __param(0, (0, common_1.Body)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getBlockedBys", null);
 __decorate([
     (0, common_1.Post)('remove-block'),
     __param(0, (0, common_1.Body)('id')),

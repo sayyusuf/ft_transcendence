@@ -1,15 +1,6 @@
-import { IoAdapter } from '@nestjs/platform-socket.io';
-import { WebSocketGateway } from '@nestjs/websockets';
-
-import { Server } from 'socket.io';
-
-import { WebSocket } from 'ws';
+import * as argon from 'argon2'
 import { io } from 'socket.io-client';
-import { DESTRUCTION } from 'dns';
 
-import { Socket } from 'net';
-import { UserService } from 'src/user/user.service';
-import { stat } from 'fs';
 
 async function sleep(ms: number) {
   return await new Promise((resolve) => {
@@ -141,32 +132,73 @@ export class ChannelService {
     })
   }
 
-  inviteGame(user_id:number, invited_id:number){
-      // onceden listede olup olmadigini kontrol et
-      this.game_list.push({ user_id:user_id, invited_id:invited_id, is_accepted:false })
-      for (let i = 0; i < this.data.users.length; i++) {
-        const user = this.data.users[i];
-        if (user.user_id === invited_id){
-          for (let j = 0; j < this.data.users.length; j++) {
-            const elem = this.data.users[j];
-            if (elem.user_id === user_id){
-              user.socket.emit('GET_INVITE', JSON.stringify({ user_id:user_id, user_nick: elem.user_nick, channel_name: this.data.channel_name }))
-              setTimeout(() => {
-                 for (let h = 0; h < this.game_list.length; h++) {
-                   const game = this.game_list[h];
-                   if (game.user_id === user_id){
-                       for (let e = 0; e < this.data.users.length; e++) {
-                         const u = this.data.users[e];
-                         if (u.user_id === user_id || u.user_id === invited_id)
-                              u.socket.emit('INVITE_RES', false)
-                       }
-                   }
-                 }
-              }, 15000);
-            }
-          }        
-        }
+  // checkGameList(invited_id: number) : boolean{
+  //   for (let i = 0; i < this.game_list.length; i++) {
+  //     const game = this.game_list[i];
+  //     if (game.invited_id === invited_id || game.user_id)
+  //       return false
+  //   }
+  //   return true
+  // }
+
+   getUserById(id)  {
+    for (let i = 0; i < this.data.users.length; i++) {
+      const element = this.data.users[i];
+      if (element.user_id === id){
+        return element
       }
+    }
+    return undefined
+  }
+
+   inviteGame(user_id:number, invited_id:number, busy: number[]){
+      // onceden listede olup olmadigini kontrol et
+
+      this.game_list.push({ user_id:user_id, invited_id:invited_id, is_accepted:false })
+
+      const invited_user =  this.getUserById(invited_id)
+      const inviter = this.getUserById(user_id)
+
+      invited_user.socket.emit('GET_INVITE', JSON.stringify({ user_id:user_id, user_nick: inviter.user_nick, channel_name: this.data.channel_name }))
+      setTimeout(() => {
+        for (let h = 0; h < this.game_list.length; h++) {
+          const game = this.game_list[h];
+          if (game.user_id === inviter.user_id ){
+              if (game.is_accepted === false){
+                  invited_user.socket.emit('INVITE_RES', false)
+                  inviter.socket.emit('INVITE_RES', false)
+                  busy.splice(busy.indexOf(invited_user.user_id), 1)
+                  busy.splice(busy.indexOf(inviter.user_id), 1)       
+              }
+          }
+        }
+     }, 15000);
+
+      // for (let i = 0; i < this.data.users.length; i++) {
+      //   const user = this.data.users[i];
+      //   if (user.user_id === invited_id){
+      //     for (let j = 0; j < this.data.users.length; j++) {
+      //       const elem = this.data.users[j];
+      //       if (elem.user_id === user_id){
+      //         user.socket.emit('GET_INVITE', JSON.stringify({ user_id:user_id, user_nick: elem.user_nick, channel_name: this.data.channel_name }))
+      //         setTimeout(() => {
+      //            for (let h = 0; h < this.game_list.length; h++) {
+      //              const game = this.game_list[h];
+      //              if (game.user_id === user_id){
+      //                  for (let e = 0; e < this.data.users.length; e++) {
+      //                    const u = this.data.users[e];
+      //                    if (u.user_id === user_id || u.user_id === invited_id)
+      //                         u.socket.emit('INVITE_RES', false)
+      //                  }
+      //              }
+      //            }
+      //         }, 15000);
+
+      //       }
+      //     }        
+      //   }
+      // }
+      return true
   }
 
   acceptInvite(user_id:number, opponent_id:number){
@@ -194,7 +226,7 @@ export class ChannelService {
     }
     if (
       (this.data.channel_status === 1 || this.data.channel_status === 0  )&&
-      user.password === this.data.password
+      await argon.verify(this.data.password, user.password)
     ) {
       delete user.password;
       if (this.data.users.length === 0){
@@ -354,7 +386,7 @@ export class ChannelService {
 
   async changePassw(user_id: number ,pass: string): Promise<boolean> {
     if (await this.isOwner(user_id)) {
-      this.data.password = pass;
+      this.data.password = await argon.hash(pass);
       return true;
     }
     return false;

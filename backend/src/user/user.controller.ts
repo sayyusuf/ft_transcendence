@@ -83,13 +83,18 @@ export class UserController {
 	}
 
 	@Post('block-friend')
-	async blockFriend(@Body('id') id, @Body('nick') nick){
+	async blockFriend(@Body('id') id, @Body('nick') nick){		
 		return await this.userService.blockFriend(Number(id), nick)
 	}
 
 	@Post('get-blocks')
 	async getBlocks(@Body('id') id){
 		return await this.userService.getBlocks(id)
+	}
+
+	@Post('get-blocked-bys')
+	async getBlockedBys(@Body('id') id){
+		return await this.userService.getBlockedBys(id)
 	}
 
 	@Post('remove-block')

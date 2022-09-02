@@ -328,6 +328,17 @@ game = (match_id: string, match_info_id ) => {
   this.wss.to(match_id).emit("in_game", match_info[match_info_id]); 
 }
 
+@SubscribeMessage('already_in_game')
+alreadyInGameHandleFunction (client: Socket, invited_id : number) : void {
+  for(let i = 0; client_array.length; i++) {
+    if(client_array[i].user_id == invited_id) {
+      this.wss.to(client.id).emit("already_in_res", false) 
+      return 
+    }
+  }
+  this.wss.to(client.id).emit("already_in_res", true) 
+}
+
 
 @SubscribeMessage('user_move')
 userMouseMovementHandle(client: Socket, side: string): void {   //WsResponse<string>

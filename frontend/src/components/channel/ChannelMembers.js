@@ -1,7 +1,7 @@
 import { ListGroup, Button, Modal } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUserEdit, faVolumeMute, faBan, faVolumeUp, faCheck, faRightFromBracket } from '@fortawesome/free-solid-svg-icons'
+import { faUserEdit, faVolumeMute, faBan, faVolumeUp, faCheck, faRightFromBracket, faX } from '@fortawesome/free-solid-svg-icons'
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom'
 import Countdown from 'react-countdown';
@@ -123,7 +123,20 @@ export default function ChannelMembers({ myChannels, currentChannel, showInvite,
 		socket.emit('LEAVE', JSON.stringify(payload))
 	}
 
+	const handleBlock = (nick) => {
+		const payload = {
+			id: user.id,
+			nick: nick
+		}
 
+		axios.post(`${process.env.REACT_APP_API_URL}/user/block-friend`, payload)
+			.then((response) => {
+				alert(`${response.data.nick} blocked`)			
+			})
+			.catch(() => {
+				alert(`User with nickname: ${nick} couldnt be blocked`)			
+			})
+	}
 
 	return (
 		<>
@@ -143,14 +156,15 @@ export default function ChannelMembers({ myChannels, currentChannel, showInvite,
 						{is_owner() ?	( myuser.is_owner ?  '' : (
 							<>
 								<Button onClick={() => handleAddOwner(myuser.user_id)} style={{fontSize:'12px'}} variant="success"  > <FontAwesomeIcon icon={faUserEdit} /> </Button>
-								<Button onClick={() => handleBan(myuser.user_id)}  style={{fontSize:'12px', marginLeft:'8px'}} variant="danger"  > <FontAwesomeIcon icon={faBan} /> </Button>
+								<Button onClick={() => handleBan(myuser.user_id)}  style={{fontSize:'12px', marginLeft:'8px'}} variant="danger"  > <FontAwesomeIcon icon={faX} /> </Button>
 								<Button onClick={() => handleKick(myuser.user_id)}  style={{fontSize:'12px', marginLeft:'8px'}} variant="danger"  > <FontAwesomeIcon icon={faRightFromBracket} /> </Button>
 								{myuser.is_muted 
 							? (	<Button onClick={() => handleUnmute(myuser.user_id)}  style={{fontSize:'12px', marginLeft: myuser.is_owner ? '' : '8px'}} variant="primary"  > <FontAwesomeIcon icon={faVolumeUp} /> </Button>)
-							: ( <Button onClick={() => handleMute(myuser.user_id)} style={{fontSize:'12px', marginLeft: myuser.is_owner ? '' : '8px'}} variant="warning"  > <FontAwesomeIcon icon={faVolumeMute} /> </Button> )}	
+							: ( <Button onClick={() => handleMute(myuser.user_id)} style={{fontSize:'12px', marginLeft: myuser.is_owner ? '' : '8px'}} variant="warning"  > <FontAwesomeIcon icon={faVolumeMute} /> </Button> )}
 							</>		
 							)
-						) : ""}													
+						) : ""}	
+						{myuser.user_id !== user.id ? <Button onClick={() => handleBlock(myuser.user_nick)}  style={{fontSize:'12px', marginLeft:'8px'}} variant="danger"  > <FontAwesomeIcon icon={faBan} /> </Button> : ''}												
 						</div>					
 					</ListGroup.Item>
 				))}

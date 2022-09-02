@@ -10,17 +10,14 @@ import {
 } from '@nestjs/websockets';
 
 import { Socket } from 'dgram';
-import { connect } from 'http2';
-
-import { combineLatest, from, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Server } from 'socket.io';
 import { ChannelService } from './channel.service';
-
+import * as argon from 'argon2'
 
 const channels: ChannelService[] = [];
 
 const onlineUsers = []
+const busy = []
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class EventsGateway
@@ -82,7 +79,7 @@ export class EventsGateway
           channel_id: id,
           users: [],
           channel_status: com.status,
-          password: com.password,
+          password:  await argon.hash(com.password),
           owners: [],
           banned_users:[]
         }),
@@ -130,9 +127,20 @@ export class EventsGateway
   param2 : any
 }asasdasd
 */
+
+  // checkAlreadyInGame(client:Socket, com) : Boolean{
+  //     for (let i = 0; i < channels.length; i++) {
+  //       const c = channels[i];
+  //       c.checkGameList(com.param1)
+  //     }
+  // }
+
   @SubscribeMessage('ADMIN')
-  async handleAdmin(client: any, data : any) : Promise<boolean>{
+  async handleAdmin(client: Socket, data : any) : Promise<boolean>{
     let com : any = JSON.parse(data)
+    // if (this.checkAlreadyInGame(client ,com) === false){
+    //     client.emit('INVITE_RES', false)
+    // }
     for (let i : number = 0; i < channels.length; i++){
       if (com.channel_name === await channels[i].getChannelName()){
         if (com.command === "change_password")
@@ -154,8 +162,20 @@ export class EventsGateway
           await channels[i].changeStatus(Number(com.user_id), Number(com.param1), com.param2)
         else if (com.command === "add_admin")
           await channels[i].addOwner(com.user_id, com.param1);
-        else if (com.command === "invite_game")
-          channels[i].inviteGame(com.user_id, com.param1);
+        else if (com.command === "invite_game"){
+          for (let i = 0; i < busy.length; i++) {
+            const g = busy[i];
+            if (g === com.param1){          
+              client.emit('FEEDBACK', `Cannot be invited. Player is busy!`)
+              client.emit('INVITE_RES', false)
+              return false
+            }
+          }
+          busy.push(com.user_id)
+          busy.push(com.param1)
+          channels[i].inviteGame(com.user_id, com.param1, busy);
+        }
+          
         else if (com.command === "accept_invite"){
           channels[i].acceptInvite(com.user_id, com.param1);
         }
