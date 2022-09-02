@@ -43,7 +43,7 @@ export default function ChannelList(  {myChannels, setMyChannels, setCurrentChan
 			user_nick: user.nick,
 			channel_name: chann_name,
 			status: status,
-			password: pass
+			password: pass === null ? 'hello' : pass
 		}
 		setShowPass(false)
 		setShow(false)

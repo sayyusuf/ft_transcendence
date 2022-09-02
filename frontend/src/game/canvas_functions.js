@@ -35,6 +35,11 @@ export function welcome_page(c) {
 
     drawRect(40,270,100,1,'black',c);
 
+    drawText("How to Play?", 450, 100, 'black', c , 'bold 24px arial');
+    drawText("You can control racket by mouse control. ", 450, 130, 'black', c , '18px arial');
+    drawText("When one of player reach 3 point,", 450, 150, 'black', c , '18px arial');
+    drawText(" match is over.", 450, 170, 'black', c , '18px arial');
+
     drawText("Server Status:", 40, 300, 'black', c , "18px Arial");
     //drawText("Id:", 40, 320, 'black', c, "18px Arial");
     drawText("Game Status:", 40, 340, 'black', c, "18px Arial");

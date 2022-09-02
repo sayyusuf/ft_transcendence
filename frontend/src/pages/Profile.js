@@ -83,7 +83,7 @@ const Profile = () => {
 										{matchData.map((match, index) =>{
 											if (match.user1 === userData.id){
 												return (
-													<Col className="col-12" style={{padding: '6px'}}>
+													<Col className="col-12" style={{padding: '6px'}} key={index}>
 														 <Card bg="success">
 															<Card.Title><h2 className="text-center">Win</h2></Card.Title>
 															<Card.Body>
@@ -99,7 +99,7 @@ const Profile = () => {
 											}
 											else{
 												return (
-													<Col className="col-12" style={{padding: '6px'}}>
+													<Col className="col-12" style={{padding: '6px'}} key={index}>
 														 <Card bg="danger">
 															<Card.Title><h2 className="text-center">Lose</h2></Card.Title>
 															<Card.Body>

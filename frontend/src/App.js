@@ -11,19 +11,22 @@ import Friends from './pages/Friends'
 import Game from './pages/Game'
 import WatchGame from './pages/WatchGame'
 import Channel from "./pages/Channel";
+import { useState } from 'react'
 
 function App() {
+  const [showInvite, setShowInvite] = useState(false);
+
 
   return (
     <>
       <Routes>
-        <Route path="/" element={<Layout/>}>
+        <Route path="/" element={<Layout showInvite={showInvite}  setShowInvite={setShowInvite} />}>
               <Route index={true} element={<PrivateRoute> <Dashboard/> </PrivateRoute>} />
               <Route path="profile/:id" element={<PrivateRoute> <Profile/> </PrivateRoute>} />
               <Route path="settings" element={<PrivateRoute> <Settings/> </PrivateRoute>} />
               <Route path="friends" element={<PrivateRoute> <Friends/> </PrivateRoute>} />
               <Route path="game" element={<PrivateGameRoute> <Game/> </PrivateGameRoute>} />
-              <Route path="channels" element={<PrivateGameRoute> <Channel/> </PrivateGameRoute>} />
+              <Route path="channels" element={<PrivateGameRoute> <Channel showInvite={showInvite}  setShowInvite={setShowInvite} /> </PrivateGameRoute>} />
               <Route path="watch-game/:id" element={<PrivateGameRoute> <WatchGame/> </PrivateGameRoute>} />
         </Route>      
         <Route path="/login" element={<Login/>} />

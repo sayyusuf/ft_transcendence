@@ -1,5 +1,5 @@
 import axios from "axios"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button, Form } from "react-bootstrap"
 import { Navigate, useNavigate } from "react-router-dom"
 import { Socket } from "socket.io-client"
@@ -8,9 +8,8 @@ import { useAuth } from "../context/AuthContext"
 export default function PrivateRoute({children}){
 	// kullanici oturum acmis mi
 	const navigate = useNavigate()
-	const [factor, setFactor] = useState(false)
 
-	const { user } = useAuth()
+	const { user, factor, setFactor } = useAuth()
 	if (!user){
 		return (
 			<Navigate to="/login" />
@@ -49,16 +48,13 @@ export default function PrivateRoute({children}){
 }
 
 export function PrivateGameRoute({children}){
-	const [factor, setFactor] = useState(false)
-
-	const { user } = useAuth()
+	
+	const { user, factor, setFactor } = useAuth()
 	if (!user){
 		return (
 			<Navigate to="/login" />
 		)
 	}
-
-
 	if (user.two_factor_enabled && !factor){
 		const handleVerify = () => {
 			axios.post(`${process.env.REACT_APP_API_URL}/user/verify`, {

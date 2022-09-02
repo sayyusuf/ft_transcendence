@@ -6,7 +6,8 @@ const Context = createContext()
 export const AuthProvider = ({ children }) => {
 	const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || false)
 	const [msgArr, setMsgArr] = useState([])
-
+	const [factor, setFactor] = useState(false)
+	
 	const socket = io(`${process.env.REACT_APP_API_URL}`)
 	
 	
@@ -17,14 +18,20 @@ export const AuthProvider = ({ children }) => {
 		})
 	}, [msgArr])
 	
-	
+	useEffect(() => {
+		socket.addEventListener('FEEDBACK', (msg) => {
+			alert(msg)
+		})
+	}, [])
 
 	const data = {
 		user,
 		setUser,
 		socket,
 		msgArr,
-		setMsgArr
+		setMsgArr,
+		factor,
+		setFactor
 	}
 	localStorage.setItem('user', JSON.stringify(user))
 	return (

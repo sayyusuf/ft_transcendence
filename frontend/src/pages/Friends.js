@@ -96,8 +96,7 @@ const Friends = () => {
 		axios.post(`${process.env.REACT_APP_API_URL}/user/add-friend`, payload)
 			.then((response) => {			
 				setRefresh(!refresh)
-				alert(`${response.data.nick} added as a friend`)
-				
+				alert(`${response.data.nick} added as a friend`)	
 			})
 			.catch(() => {
 				alert(`User with nickname: ${addNick} is not found`)
@@ -184,15 +183,34 @@ const Friends = () => {
 									<ListGroupItem key={index}>
 										<div className="d-flex justify-content-between">
 											<div>
-											<UserStatus userId={friend.id} />	<h3 className="px-1  d-inline-block" >{friend.nick}</h3>  
+												<Row>
+													<Col className="col-2">
+														<UserStatus userId={friend.id} />
+													</Col>
+													<Col className="col-4">
+														<img style={{width:'100px'}} src={friend.avatar}  alt={friend.nick} />
+													</Col>
+													<Col className="col-3">
+														<b className="px-1">{friend.nick}</b>														
+													</Col>
+													<Col className="col-3">
+														<Row>
+															<Col className="col-6">
+																	<Button onClick={() => {
+																setActiveChatUser({nick:friend.nick , friend_id:friend.id})
+																setActiveChat(true)
+															}}  variant="success">Chat</Button>
+															</Col>
+															<Col className="col-6">
+																<Button style={{ marginLeft: '8px' }} onClick={() => handleBlock(friend.nick)} variant="danger">Block</Button>
+															</Col>
+														</Row>						
+																												
+													</Col>
+												</Row>
+											
 											</div>
-											<div>
-												<Button onClick={() => {
-													setActiveChatUser({nick:friend.nick , friend_id:friend.id})
-													setActiveChat(true)
-												}}  variant="success">Chat</Button>
-												<Button style={{ marginLeft: '8px' }} onClick={() => handleBlock(friend.nick)} variant="danger">Block</Button>
-											</div>
+											
 
 										</div>
 									</ListGroupItem>

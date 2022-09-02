@@ -1,10 +1,32 @@
 import { useEffect, useState } from 'react'
 import { Row, Col, Button, Form } from 'react-bootstrap'
 import { useAuth } from '../../context/AuthContext'
+import axios from 'axios'
 
 export default function ChannelChat({ myChannels, currentChannel }){
 	const { user, socket, msgArr, setMsgArr } = useAuth()
+	const [filteredMessage, setFilteredMessage] = useState([])
 	const [msg, setMsg] = useState('')
+
+	axios.post(`${process.env.REACT_APP_API_URL}/user/get-blocks`, { id:user.id })
+	.then(res => {
+		axios.post(`${process.env.REACT_APP_API_URL}/user/get-blocked-bys`, { id:user.id })
+		.then(response => {
+			const concat = res.data.concat(response.data) 
+			const copy = JSON.parse(JSON.stringify(msgArr))
+			const filterMessage = copy.filter((msg) => msg.sender === myChannels[currentChannel].channel_id);
+			const is_in = (userId) => {
+				for (let i = 0; i < concat.length; i++) {
+					const block = concat[i];
+					if (block.id === userId)
+						return true
+				}
+				return false
+			}
+			const filtered = filterMessage.filter((value) => !is_in(value.replier))
+			setFilteredMessage(filtered)
+		})
+	})
 
 	const handleSend = () => {
 		if (msg.length < 1){
@@ -32,7 +54,9 @@ export default function ChannelChat({ myChannels, currentChannel }){
 		})
 	}, [])
 
-	const filterMessage = msgArr.filter((msg) => msg.sender === myChannels[currentChannel].channel_id);
+
+
+	
 	return (
 		<>
 			<div id="chat-div" style={{
@@ -43,7 +67,7 @@ export default function ChannelChat({ myChannels, currentChannel }){
 				}}>
 					<div>
 						<ul id="messages">
-						{filterMessage.map((msg, index) => (
+						{filteredMessage.map((msg, index) => (
 								<li key={index}>
 									<b>{`${msg.replier_nick}: `} </b>{msg.data}
 								</li>

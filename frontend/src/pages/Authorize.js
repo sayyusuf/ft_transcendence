@@ -17,7 +17,7 @@ const Authorize =  () => {
 		.then(response => {
 			console.log(response.data)
 			setUser(response.data)
-			navigate('/')
+			navigate('/settings')
 		})
 		.catch(() => navigate('/login'))
 

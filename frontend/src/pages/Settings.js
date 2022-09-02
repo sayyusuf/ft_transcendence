@@ -11,7 +11,7 @@ export default function Settings() {
 	const [showAvatar, setShowAvatar] = useState(false)
 	const [changeSuccess, setChangeSuccess] = useState(false);
 	const [avatarValue, setAvatarValue] = useState('')
-	const [qrData, setQRData] = useState(false)
+	const [qrData, setQRData] = useState('')
 	const [factorState, setFactorState] = useState(user.two_factor_enabled)
 
 	const handleClose = () => setShow(false);

@@ -1,19 +1,40 @@
 import { ListGroup, Button, Modal } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUserEdit, faVolumeMute, faBan, faVolumeUp, faCheck } from '@fortawesome/free-solid-svg-icons'
+import { faUserEdit, faVolumeMute, faBan, faVolumeUp, faCheck, faRightFromBracket } from '@fortawesome/free-solid-svg-icons'
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom'
 import Countdown from 'react-countdown';
+import UserStatus from "../UserStatus";
+import axios from "axios";
 
-export default function ChannelMembers({ myChannels, currentChannel }){
+export default function ChannelMembers({ myChannels, currentChannel, showInvite, setShowInvite}){
 	const { user, socket } = useAuth()
-	const [showInvite, setShowInvite] = useState(false);
-	
+	const [filteredUsers, setFilteredUsers] = useState([])
 	const navigate = useNavigate()
+	//const [showInvite, setShowInvite] = useState(false);
 	const handleCloseInvite = () => setShowInvite(false);
 	const handleShowInvite = () => setShowInvite(true);
 	
+	axios.post(`${process.env.REACT_APP_API_URL}/user/get-blocks`, { id:user.id })
+	.then(res => {
+		axios.post(`${process.env.REACT_APP_API_URL}/user/get-blocked-bys`, { id:user.id })
+		.then(response => {
+			const concat = res.data.concat(response.data) 
+			const copy = JSON.parse(JSON.stringify(myChannels[currentChannel].users))
+			const is_in = (userId) => {
+				for (let i = 0; i < concat.length; i++) {
+					const block = concat[i];
+					if (block.id === userId)
+						return true
+				}
+				return false
+			}
+			const filtered = copy.filter((value) => !is_in(value.user_id))
+			setFilteredUsers(filtered)
+		})
+	})
+
 	const is_owner = () =>{
 		for (let i = 0; i < myChannels[currentChannel].users.length; i++) {
 			const channUser = myChannels[currentChannel].users[i];
@@ -80,9 +101,10 @@ export default function ChannelMembers({ myChannels, currentChannel }){
 		alert('User has been successfully unmuted')
 	}
 
-	const handleProfile = (userId) => { console.log('user == ', userId); navigate(`/profile/${userId}`) }
+	const handleProfile = (userId) => { navigate(`/profile/${userId}`) }
 
 	const handleInvite = (userId) => {
+
 		handleShowInvite()
 		const payload = {
 			command: 'invite_game',
@@ -93,15 +115,25 @@ export default function ChannelMembers({ myChannels, currentChannel }){
 		socket.emit('ADMIN', JSON.stringify(payload))
 	}
 
-	
+	const handleKick = (userId) => {
+		const payload = {
+			user_id: userId,
+			channel_name: myChannels[currentChannel].channel_name
+		}
+		socket.emit('LEAVE', JSON.stringify(payload))
+	}
+
+
+
 	return (
 		<>
 			<h4 className="font-weight-light" >Member List</h4>
 			<hr/>
 			<ListGroup>
-				{myChannels[currentChannel].users.map((myuser, index) => (
+				{filteredUsers.map((myuser, index) => (
 					<ListGroup.Item key={index}>
 						<div>
+							<UserStatus userId={myuser.user_id} />
 							<b>{myuser.user_nick}</b>  {myuser.is_muted ? <FontAwesomeIcon icon={faVolumeMute} /> : ''}
 							{myuser.user_id !== user.id ? <a onClick={() => handleProfile(myuser.user_id)} style={{cursor: 'pointer'}}  className="text-decoration-none text-primary"> Profile </a> : ''}
 							
@@ -112,6 +144,7 @@ export default function ChannelMembers({ myChannels, currentChannel }){
 							<>
 								<Button onClick={() => handleAddOwner(myuser.user_id)} style={{fontSize:'12px'}} variant="success"  > <FontAwesomeIcon icon={faUserEdit} /> </Button>
 								<Button onClick={() => handleBan(myuser.user_id)}  style={{fontSize:'12px', marginLeft:'8px'}} variant="danger"  > <FontAwesomeIcon icon={faBan} /> </Button>
+								<Button onClick={() => handleKick(myuser.user_id)}  style={{fontSize:'12px', marginLeft:'8px'}} variant="danger"  > <FontAwesomeIcon icon={faRightFromBracket} /> </Button>
 								{myuser.is_muted 
 							? (	<Button onClick={() => handleUnmute(myuser.user_id)}  style={{fontSize:'12px', marginLeft: myuser.is_owner ? '' : '8px'}} variant="primary"  > <FontAwesomeIcon icon={faVolumeUp} /> </Button>)
 							: ( <Button onClick={() => handleMute(myuser.user_id)} style={{fontSize:'12px', marginLeft: myuser.is_owner ? '' : '8px'}} variant="warning"  > <FontAwesomeIcon icon={faVolumeMute} /> </Button> )}	
@@ -134,7 +167,7 @@ export default function ChannelMembers({ myChannels, currentChannel }){
 				))}
 			</ListGroup>
 
-			<Modal show={showInvite} onHide={handleCloseInvite}>
+			<Modal show={showInvite}>
 				<Modal.Header closeButton>
 					<Modal.Title>Waiting for opponent</Modal.Title>
 				</Modal.Header>
