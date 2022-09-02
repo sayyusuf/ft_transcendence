@@ -19,7 +19,7 @@ const Canvas = () => {
 
 
 const Game = ({ currentColor }) => {
-	const { user, socket, setInGame } = useAuth()
+	const { user, socket } = useAuth()
 	const navigate = useNavigate()
 
 	function unloadHandler(){

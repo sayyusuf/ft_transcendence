@@ -4,7 +4,6 @@ import { Row, Col, Form, Button, Modal } from "react-bootstrap"
 import { useAuth } from "../context/AuthContext"
 
 
-
 export default function Settings({ currentColor, setColor }) {
 	const { user, setUser } = useAuth()
 	const [nickname, setNickname] = useState(user.nick)
@@ -25,6 +24,12 @@ export default function Settings({ currentColor, setColor }) {
 		status: 1
 	}).then(() => {})
 
+	const changeColor = () => {
+		const new_color = document.querySelector('input[name="color"]:checked').value
+		if (currentColor !== new_color)
+			setColor(new_color)
+	}
+
 	useEffect(() => {
 		if (!user.two_factor_enabled){
 			const payload = {
@@ -34,11 +39,6 @@ export default function Settings({ currentColor, setColor }) {
 			.then(res => setQRData(res.data))
 		}
 	},[factorState])
-
-	const changeColor = () => {
-		const new_color = document.querySelector('input[name="color"]:checked').value
-		localStorage.setItem('game_color', new_color)
-	}
 
 	const changeFactorHandle = () => {
 		const url = `${process.env.REACT_APP_API_URL}/user/verify`;
@@ -183,7 +183,7 @@ export default function Settings({ currentColor, setColor }) {
 				<b>Select Background Theme:  </b>
 				<Form.Check
 					inline 
-					checked={localStorage.getItem('game_color') === 'black'} 
+					checked={currentColor === 'black'} 
 					label="Classic"
 					name="color"
 					type="radio"
@@ -194,7 +194,7 @@ export default function Settings({ currentColor, setColor }) {
 				<Form.Check
 					inline
 					label="Green"
-					checked={localStorage.getItem('game_color') === 'green'} 
+					checked={currentColor === 'green'} 
 					value="green"
 					name="color"
 					type="radio"
@@ -204,7 +204,7 @@ export default function Settings({ currentColor, setColor }) {
 				<Form.Check
 					inline
 					label="Red"
-					checked={localStorage.getItem('game_color') === 'red'} 
+					checked={currentColor === 'red'} 
 					value="red"
 					name="color"
 					type="radio"
