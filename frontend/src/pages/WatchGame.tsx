@@ -25,7 +25,6 @@ export default function WatchGame(){
 
 
 useEffect(() => {
-
 	const canvas = document.getElementById("pong");
 	const c = canvas.getContext('2d');
 	
@@ -85,10 +84,6 @@ useEffect(() => {
 
 	socket.on("in_game", render);
 	socket.emit("join-room_from_another_page", id)
-
-
-
-	
 
 	
 

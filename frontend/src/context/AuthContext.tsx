@@ -1,7 +1,9 @@
+import { Socket } from "dgram"
 import { createContext, useContext, useEffect, useState } from "react"
 import {io } from 'socket.io-client'
 
-const Context = createContext()
+const Context = createContext({
+})
 
 export const AuthProvider = ({ children }) => {
 	const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || false)

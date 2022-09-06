@@ -9,7 +9,7 @@ window.onunload = handleGlobalUnload
 
 localStorage.setItem('game_color', 'black')
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <BrowserRouter>
     <AuthProvider>
