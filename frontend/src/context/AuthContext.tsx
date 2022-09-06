@@ -7,7 +7,7 @@ export const AuthProvider = ({ children, socket }) => {
 	const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || false)
 	const [msgArr, setMsgArr] = useState([])
 	const [factor, setFactor] = useState(false)
-	
+	console.log('context yenilendi')
 	
 	
 	useEffect(() => {
@@ -15,6 +15,7 @@ export const AuthProvider = ({ children, socket }) => {
 			const parsed = JSON.parse(data)
 			setMsgArr([...msgArr, parsed])
 		})
+		socket.on('hello', msg => console.log(msg))
 	}, [msgArr])
 	
 	useEffect(() => {

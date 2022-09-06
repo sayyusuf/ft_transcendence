@@ -46,8 +46,8 @@ export default function ChannelList(  {myChannels, setMyChannels, setCurrentChan
 			password: pass === null ? 'hello' : pass
 		}
 		setShowPass(false)
-		socket.emit('CHAN', JSON.stringify(data))
 		setShow(false)	
+		socket.emit('CHAN', JSON.stringify(data))
 	}
 
 	return (		
