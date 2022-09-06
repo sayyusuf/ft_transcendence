@@ -232,6 +232,11 @@ export class EventsGateway
     await this.handleGetAll(client, data)
   }
 
+  @SubscribeMessage('FINISH_GAME')
+  async handleFinishGame(client: any, id: any) {
+    busy.splice(busy.indexOf(id), 1)
+  }
+
   @SubscribeMessage('PRIV')
   async handleEvent(client: any, data: any): Promise<string> {
     let com = JSON.parse(data);

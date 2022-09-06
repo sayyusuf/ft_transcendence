@@ -196,14 +196,16 @@ const Game = ({ currentColor }) => {
 				return
 			}
 			if(data === "stop") {
+				socket.emit('FINISH_GAME', user.id)
 				socket.off("in_game");
 				c.clearRect(0, 0, canvas.width, canvas.height);
 				drawText("Game Finished or one of gameUser disconnected!", 40, canvas.height/2, 'black', c , "30px Arial");
-				drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");
+				drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");		
 				game_Start_flag = 4;
 				return
 			}
 			if(data === "won") {
+				socket.emit('FINISH_GAME', user.id)
 				socket.off("in_game");
 				c.clearRect(0, 0, canvas.width, canvas.height);
 				drawText("You Won !", 40, canvas.height/2, 'black', c , "30px Arial");
@@ -216,6 +218,7 @@ const Game = ({ currentColor }) => {
 				return
 			}
 			if(data === "loss") {
+				socket.emit('FINISH_GAME', user.id)
 				socket.off("in_game");
 				c.clearRect(0, 0, canvas.width, canvas.height);
 				drawText("You Lost !", 40, canvas.height/2, 'black', c , "30px Arial");

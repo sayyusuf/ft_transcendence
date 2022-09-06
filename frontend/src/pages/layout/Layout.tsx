@@ -40,6 +40,7 @@ const Layout = ({ setShowInvite }) => {
 		socket.addEventListener('INVITE_RES', (data) => {
 			console.log(data)
 			if (data){
+				setShowInvite(false)
 				navigate('/game')
 			}
 			else{

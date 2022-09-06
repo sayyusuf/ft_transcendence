@@ -1,14 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react"
-import {io } from 'socket.io-client'
+
 
 const Context = createContext(null)
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children, socket }) => {
 	const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || false)
 	const [msgArr, setMsgArr] = useState([])
 	const [factor, setFactor] = useState(false)
 	
-	const socket = io(`${process.env.REACT_APP_API_URL}`)
 	
 	
 	useEffect(() => {
