@@ -436,7 +436,6 @@ let UserService = class UserService {
                 opponent = value.user2;
             else
                 opponent = value.user1;
-            console.log(opponent);
             const opponentData = await this.getUserById(opponent);
             const jsonCopy = JSON.parse(JSON.stringify(value));
             jsonCopy.opponent = opponentData.nick;

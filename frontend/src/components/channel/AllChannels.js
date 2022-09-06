@@ -15,7 +15,7 @@ export default function AllChannels({ allChannels, myChannels }){
 		socket.on('JOIN_STATUS', (stat) => {
 			if (stat === true){
 				alert(`Joined successfully`)
-				handleClose()			
+				handleClose()		
 			}
 			else{
 				alert(`Joining failed`)

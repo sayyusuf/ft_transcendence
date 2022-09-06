@@ -204,6 +204,7 @@ win_loss_function(info) {
         }
       })
       winner.then((res) => {
+        console.log(res)
         db.user.update({
           where:{
             id: res.id
@@ -222,7 +223,7 @@ win_loss_function(info) {
             }
           }).then(() => {})
         }
-        else if (res.win + 1 === 15){
+        else if (res.win + 1 === 10){
           db.achievements.create({
             data:{
               userId:res.id,
@@ -231,7 +232,8 @@ win_loss_function(info) {
             }
           }).then(() => {})
         }
-        if ((0.5 - (res.win * 0.02)) < 0.1 ? 0.1 + res.level  :  (0.5 - (res.win * 0.02)) + res.level >= 1.0){
+        if (res.level < 1 &&  ((0.5 - (res.win * 0.02)) < 0.1 ? 0.1 + res.level  :  (0.5 - (res.win * 0.02)) + res.level >= 1.0)){
+          console.log(Math.floor(res.level) < 1)
           db.achievements.create({
             data:{
               userId:res.id,
@@ -240,7 +242,7 @@ win_loss_function(info) {
             }
           }).then(() => {})
         }
-        if ((0.5 - (res.win * 0.02)) < 0.1 ? 0.1 + res.level  :  (0.5 - (res.win * 0.02)) + res.level >= 5.0){
+        if (res.level < 5 && ((0.5 - (res.win * 0.02)) < 0.1 ? 0.1 + res.level  :  (0.5 - (res.win * 0.02)) + res.level >= 5.0)){
           db.achievements.create({
             data:{
               userId:res.id,
@@ -249,7 +251,7 @@ win_loss_function(info) {
             }
           }).then(() => {})
         }
-         if (res.win  + res.lose + 1 >= 20){
+         if (res.win  + res.lose + 1 === 20){
           db.achievements.create({
             data:{
               userId:res.id,
@@ -258,7 +260,7 @@ win_loss_function(info) {
             }
           }).then(() => {})
         }
-        if (res.win  + res.lose + 1 >= 10){
+        if (res.win  + res.lose + 1 == 10){
           db.achievements.create({
             data:{
               userId:res.id,

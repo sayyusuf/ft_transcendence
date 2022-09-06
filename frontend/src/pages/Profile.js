@@ -78,7 +78,7 @@ const Profile = () => {
 							</Card>						
 						</Col>
 						<Col className="col-5" >
-								<Card className="card-dark p-2" style={{height:'284.66px', overflowY:'auto'}}>
+								<Card className="card-dark p-2" style={{height:'284.66px', overflowY:'auto', boxSizing:"border-box"}}>
 									<h4 className="text-center" style={{color: `${user.coalition_color}`}}>Achievements</h4>
 									<Row className="gy-1">
 										{achievementData.map((achieve, index) => {

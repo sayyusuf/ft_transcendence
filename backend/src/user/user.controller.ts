@@ -104,6 +104,7 @@ export class UserController {
 
 	@Get('get-matches/:id')
 	async getMatchesById(@Param('id') id){
+		console.log(id)
 		return await this.userService.getMatchesById(Number(id))
 	}
 

@@ -66,6 +66,7 @@ let UserController = class UserController {
         return await this.userService.removeBlock(Number(id), nick);
     }
     async getMatchesById(id) {
+        console.log(id);
         return await this.userService.getMatchesById(Number(id));
     }
     async getAchievementsById(id) {
