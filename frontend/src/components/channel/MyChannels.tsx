@@ -7,26 +7,23 @@ export default function MyChannels({ myChannels, setCurrentChannel }){
 	const [show, setShow] = useState(false);
 	const [showPass, setShowPass] = useState(false)
 	const [editChannel, setEditChannel] = useState('')
-	const handleShow = () => setShow(true);
 	const handleClose = () => {
 		setShowPass(false)
 		setShow(false)
 	}
 
 	const handleEdit = () => {
-		let passElem = document.getElementById('formEditPassword')
-		if (Number(document.getElementById('formEditType').value) !== 2 && passElem.value.length < 1)
+		let passElem = (document.getElementById('formEditPassword') as HTMLInputElement)
+		if (Number((document.getElementById('formEditType') as HTMLInputElement ).value) !== 2 && passElem.value.length < 1)
 		{
 			alert('Password needed')
 			return
 		}
-		if (passElem === undefined)
-			passElem = ''
 		const payload = {
 			command: 'change_status',
 			user_id: user.id,
-			param1: Number(document.getElementById('formEditType').value),
-			param2:  passElem.value,
+			param1: Number((document.getElementById('formEditType') as HTMLInputElement ).value),
+			param2:  passElem !== undefined ? passElem.value : '',
 			channel_name: editChannel
 		}
 		console.log(payload)

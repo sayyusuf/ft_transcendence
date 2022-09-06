@@ -2,11 +2,11 @@ import axios from "axios"
 import { Button } from "react-bootstrap"
 import { useEffect, useState } from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCoffee, faEye } from '@fortawesome/free-solid-svg-icons'
+import { faEye } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate } from "react-router"
 
 const UserStatus = ({ userId }) => {
-	const [stat, setStat] = useState(false)
+	const [stat, setStat] = useState(-1)
 	const navigate = useNavigate()
 
 	const handleWatchGame = () => {

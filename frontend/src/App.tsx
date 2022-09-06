@@ -20,7 +20,7 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Layout showInvite={showInvite}  setShowInvite={setShowInvite} />}>
+        <Route path="/" element={<Layout setShowInvite={setShowInvite} />}>
               <Route index={true} element={<PrivateRoute> <Dashboard/> </PrivateRoute>} />
               <Route path="profile/:id" element={<PrivateRoute> <Profile/> </PrivateRoute>} />
               <Route path="settings" element={<PrivateRoute> <Settings currentColor={currentColor} setColor={setColor} /> </PrivateRoute>} />

@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import axios from 'axios'
 
 export default function ChannelChat({ myChannels, currentChannel }){
-	const { user, socket, msgArr, setMsgArr } = useAuth()
+	const { user, socket, msgArr} = useAuth()
 	const [filteredMessage, setFilteredMessage] = useState([])
 	const [msg, setMsg] = useState('')
 

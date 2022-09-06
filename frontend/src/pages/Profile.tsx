@@ -6,7 +6,16 @@ import { useAuth } from "../context/AuthContext"
 
 const Profile = () => {
 	const { user } = useAuth()
-	const [userData, setUserData] = useState(false)
+	const [userData, setUserData] = useState({
+		avatar:'',
+		nick:'',
+		name:'',
+		surname:'',
+		win:0,
+		lose:0,
+		level:0.0,
+		id:0
+	})
 	const [matchData, setMatchData] = useState([])
 	const [achievementData, setAchievementData] = useState([])
 	const { id } = useParams()
@@ -42,7 +51,7 @@ const Profile = () => {
 				<Card.Body>
 					<Row>
 						<Col className="col-3">
-							<img src={`${userData.avatar}`} width="100%" className="rounded-circle" />
+							<img src={`${userData.avatar}`} alt={userData.nick} width="100%" className="rounded-circle" />
 						</Col>
 						<Col className="col-4">
 							<Card className="card-dark">

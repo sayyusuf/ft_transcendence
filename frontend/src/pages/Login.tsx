@@ -1,11 +1,10 @@
-import { Navigate, useNavigate } from "react-router-dom"
+import { Navigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import '../css/login.css'
 
 
 export default function Login(){
-	const { user, setUser } = useAuth()
-	const navigate = useNavigate()
+	const { user} = useAuth()
 	if (user)
 		return (<Navigate to="/" />)
 

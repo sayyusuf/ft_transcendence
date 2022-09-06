@@ -2,9 +2,8 @@ import { ListGroup, Button, Modal } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUserEdit, faVolumeMute, faBan, faVolumeUp, faCheck, faRightFromBracket, faX } from '@fortawesome/free-solid-svg-icons'
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from 'react-router-dom'
-import Countdown from 'react-countdown';
 import UserStatus from "../UserStatus";
 import axios from "axios";
 
@@ -13,7 +12,6 @@ export default function ChannelMembers({ myChannels, currentChannel, showInvite,
 	const [filteredUsers, setFilteredUsers] = useState([])
 	const navigate = useNavigate()
 	//const [showInvite, setShowInvite] = useState(false);
-	const handleCloseInvite = () => setShowInvite(false);
 	const handleShowInvite = () => setShowInvite(true);
 	
 	axios.post(`${process.env.REACT_APP_API_URL}/user/get-blocks`, { id:user.id })

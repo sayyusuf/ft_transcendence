@@ -1,9 +1,7 @@
-import { Socket } from "dgram"
 import { createContext, useContext, useEffect, useState } from "react"
 import {io } from 'socket.io-client'
 
-const Context = createContext({
-})
+const Context = createContext(null)
 
 export const AuthProvider = ({ children }) => {
 	const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || false)
@@ -14,14 +12,14 @@ export const AuthProvider = ({ children }) => {
 	
 	
 	useEffect(() => {
-		socket.addEventListener(user.id, (data) => {
+		socket.on(user.id, (data) => {
 			const parsed = JSON.parse(data)
 			setMsgArr([...msgArr, parsed])
 		})
 	}, [msgArr])
 	
 	useEffect(() => {
-		socket.addEventListener('FEEDBACK', (msg) => {
+		socket.on('FEEDBACK', (msg) => {
 			alert(msg)
 		})
 	}, [])

@@ -8,7 +8,7 @@ import '../../css/layout.css'
 import { Button } from "react-bootstrap";
 
 const Layout = ({ setShowInvite }) => {
-	const [opponent, setOpponent] = useState({})
+	const [opponent, setOpponent] = useState({opponent_id:-1, channel_name:'',  opponent_nick:'' })
 	const [showOpponentInvite, setOpponentInvite] = useState(false)
 	const navigate = useNavigate()
 	const {setUser, user, socket} = useAuth()

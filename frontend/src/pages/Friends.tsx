@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import '../css/chat.css'
-import { io } from 'socket.io-client';
 import UserStatus from "../components/UserStatus";
 
 const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr, opponent }) => {
@@ -73,13 +72,12 @@ const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr, opponent }) =>
 const Friends = () => {
 	const [show, setShow] = useState(false);
 	const [addNick, setNick] = useState('')
-	const { user, socket, msgArr, setMsgArr} = useAuth()
+	const { user,  msgArr, setMsgArr} = useAuth()
 	const [friendArray, setFriendArray] = useState([])
 	const [activeChat, setActiveChat] = useState(false)
-	const [activeChatUser, setActiveChatUser] = useState({})
+	const [activeChatUser, setActiveChatUser] = useState({ friend_id:-1, nick:'' })
 	const [blockArray, setBlockArray] = useState([])
 	const [refresh, setRefresh] = useState(false)
-	const [showChat, setShowChat] = useState(false)
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);

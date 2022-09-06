@@ -34,7 +34,7 @@ export default function AllChannels({ allChannels, myChannels }){
 	}
 
 	const handlePasswordJoin = () => {
-		const pass = document.getElementById('formChannelPassword')
+		const pass = (document.getElementById('formChannelPassword') as  HTMLInputElement)
 		if (pass.value.length === 0){
 			alert('bad password')
 			return
@@ -90,7 +90,7 @@ export default function AllChannels({ allChannels, myChannels }){
 										)}
 									 </span>
 									 {chann.channel_status !== 0 ? (
-										 	<a onClick={() => handleJoin({ status: chann.channel_status, channel_name: chann.channel_name})}  style={{cursor: 'pointer'}}  class="text-decoration-none"> Join </a>
+										 	<a onClick={() => handleJoin({ status: chann.channel_status, channel_name: chann.channel_name})}  style={{cursor: 'pointer'}}  className="text-decoration-none"> Join </a>
 									 ) :  ''}
 								
 								 </div>

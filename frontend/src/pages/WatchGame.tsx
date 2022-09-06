@@ -3,7 +3,6 @@ import { useParams } from "react-router"
 import { useAuth } from "../context/AuthContext"
 import {drawText, drawRect, drawCircle} from "../game/canvas_functions"
 import { useNavigate } from 'react-router-dom'
-import handleGlobalUnload from '../unload'
 
 const Canvas = () => {
 	
@@ -20,12 +19,12 @@ const Canvas = () => {
 export default function WatchGame(){
 	const { id } = useParams()
 
-	const { user, socket, setInGame } = useAuth()
+	const { socket } = useAuth()
 	const navigate = useNavigate()
 
 
 useEffect(() => {
-	const canvas = document.getElementById("pong");
+	const canvas = document.getElementById("pong") as HTMLCanvasElement;
 	const c = canvas.getContext('2d');
 	
 	const gameUser = { // client gameUser bilgileri
@@ -54,7 +53,7 @@ useEffect(() => {
 	const render = (data) => {
 		console.log(data)
 		console.log("testtt")
-		if(data == "stop") {
+		if(data === "stop") {
 			socket.off("in_game");
 			c.clearRect(0, 0, canvas.width, canvas.height);
 			drawText("Game Finished or one of gameUser disconnected!", 40, canvas.height/2, 'black', c , "30px Arial");
@@ -73,7 +72,7 @@ useEffect(() => {
 	document.addEventListener('keydown', check);
 
 	function check(e) {
-		if(e.keyCode == 27) {
+		if(e.keyCode === 27) {
 			socket.off("in_game");
 			drawRect(0,0, canvas.width, canvas.height, 'white', c )
 			navigate('/friends')

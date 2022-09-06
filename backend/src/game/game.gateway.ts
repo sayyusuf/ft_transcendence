@@ -204,7 +204,6 @@ win_loss_function(info) {
         }
       })
       winner.then((res) => {
-        console.log(res)
         db.user.update({
           where:{
             id: res.id

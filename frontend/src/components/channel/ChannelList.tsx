@@ -1,4 +1,4 @@
-import { Row, Col ,Button, Form, Modal, ListGroup } from 'react-bootstrap'
+import { Row, Col ,Button, Form, Modal } from 'react-bootstrap'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext';
 import AllChannels from './AllChannels';
@@ -28,8 +28,8 @@ export default function ChannelList(  {myChannels, setMyChannels, setCurrentChan
 	}, [])
 	
 	const handleCreateChannel = () => {
-		const chann_name = document.getElementById('formChannelName').value
-		const type = document.getElementById('formChannelType').value
+		const chann_name = (document.getElementById('formChannelName') as HTMLInputElement).value
+		const type = (document.getElementById('formChannelType') as HTMLInputElement).value
 		let pass = null
 		let status = 2
 		if (type === 'private')
@@ -37,7 +37,7 @@ export default function ChannelList(  {myChannels, setMyChannels, setCurrentChan
 		else if (type === 'protected')
 			status = 1
 		if (status !== 2)
-			pass = document.getElementById('formChannelPassword').value
+			pass = (document.getElementById('formChannelPassword') as HTMLInputElement).value
 		const data = {
 			user_id: user.id,
 			user_nick: user.nick,

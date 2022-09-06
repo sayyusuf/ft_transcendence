@@ -1,13 +1,10 @@
 import axios from "axios"
-import { useEffect, useState } from "react"
 import { Button, Form } from "react-bootstrap"
-import { Navigate, useNavigate } from "react-router-dom"
-import { Socket } from "socket.io-client"
+import { Navigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 
 export default function PrivateRoute({children}){
 	// kullanici oturum acmis mi
-	const navigate = useNavigate()
 
 	const { user, factor, setFactor } = useAuth()
 	if (!user){
@@ -22,7 +19,7 @@ export default function PrivateRoute({children}){
 		const handleVerify = () => {
 			axios.post(`${process.env.REACT_APP_API_URL}/user/verify`, {
 				id: user.id,
-				token: document.getElementById('factor').value
+				token: (document.getElementById('factor') as HTMLInputElement).value
 			}).then(res => {
 				if (!res.data){
 					alert('Verification failed')
@@ -59,7 +56,7 @@ export function PrivateGameRoute({children}){
 		const handleVerify = () => {
 			axios.post(`${process.env.REACT_APP_API_URL}/user/verify`, {
 				id: user.id,
-				token: document.getElementById('factor').value
+				token: (document.getElementById('factor') as HTMLInputElement).value
 			}).then(res => {
 				if (!res.data){
 					alert('Verification failed')

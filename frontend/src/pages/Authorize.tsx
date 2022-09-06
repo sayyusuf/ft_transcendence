@@ -1,7 +1,6 @@
-import { Navigate, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import axios from 'axios'
 import { useAuth } from "../context/AuthContext"
-import { useEffect } from "react"
 
 const Authorize =  () => {
 	const searchParams = new URLSearchParams(document.location.search)
@@ -20,7 +19,11 @@ const Authorize =  () => {
 			navigate('/settings')
 		})
 		.catch(() => navigate('/login'))
-
+	return (
+		<>
+		
+		</>
+	)
 }
 
 export default Authorize

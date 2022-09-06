@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext"
 import {drawText, drawRect, welcome_page} from "../game/canvas_functions"
-import GameLogo from '../game/icons8-game-64.png'
+//import GameLogo from '../game/icons8-game-64.png'
 import axios from "axios"
 import { useNavigate } from 'react-router-dom'
 import handleGlobalUnload from '../unload'
+
+const GameLogo = require('../game/icons8-game-64.png')
 
 	// select canvas element
 const Canvas = () => {
@@ -30,7 +32,7 @@ const Game = ({ currentColor }) => {
 	}
 
 	useEffect(() => {
-		const canvas = document.getElementById("pong");
+		const canvas = document.getElementById("pong") as HTMLCanvasElement ;
 		const c = canvas.getContext('2d');
 		
 		socket.emit('connection', ['connected', user.id])

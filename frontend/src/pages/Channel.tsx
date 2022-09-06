@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react'
-import { Row, Col ,Button, Card, Modal } from 'react-bootstrap'
+import { useState } from 'react'
+import { Row, Col , Card } from 'react-bootstrap'
 import ChannelList from '../components/channel/ChannelList'
-import { useAuth } from '../context/AuthContext'
 import ChannelMembers from '../components/channel/ChannelMembers'
 import ChannelChat from '../components/channel/ChannelChat'
 import '../css/channel.css'
-import { useNavigate } from 'react-router'
+
 
 export default function Channel({ showInvite, setShowInvite }){
 	const [currentChannel, setCurrentChannel] = useState(-1)
@@ -26,7 +25,7 @@ export default function Channel({ showInvite, setShowInvite }){
 						</Col>
 						<Col className="col-7" style={{overflowY:'auto'}}>
 							{myChannels[currentChannel] === undefined ? '' : (
-								<ChannelChat myChannels={myChannels} setMyChannels={setMyChannels} currentChannel={currentChannel}/>
+								<ChannelChat myChannels={myChannels}  currentChannel={currentChannel}/>
 							)}				
 						</Col>
 						<Col className="col-3" style={{

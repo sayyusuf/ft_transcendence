@@ -10,7 +10,7 @@ export default function Settings({ currentColor, setColor }) {
 	const [show, setShow] = useState(false);
 	const [showAvatar, setShowAvatar] = useState(false)
 	const [changeSuccess, setChangeSuccess] = useState(false);
-	const [avatarValue, setAvatarValue] = useState('')
+	const [avatarValue, setAvatarValue] = useState({file:null})
 	const [qrData, setQRData] = useState('')
 	const [factorState, setFactorState] = useState(user.two_factor_enabled)
 
@@ -25,7 +25,7 @@ export default function Settings({ currentColor, setColor }) {
 	}).then(() => {})
 
 	const changeColor = () => {
-		const new_color = document.querySelector('input[name="color"]:checked').value
+		const new_color = (document.querySelector('input[name="color"]:checked') as HTMLInputElement).value
 		if (currentColor !== new_color)
 			setColor(new_color)
 	}
@@ -44,7 +44,7 @@ export default function Settings({ currentColor, setColor }) {
 		const url = `${process.env.REACT_APP_API_URL}/user/verify`;
 		const payload = {
 			id: user.id,
-			token: document.getElementById('factor').value
+			token: (document.getElementById('factor') as HTMLInputElement ).value
 		}
 		axios.post(url,  payload).then(response => {
 			if (!response.data){
@@ -127,7 +127,7 @@ export default function Settings({ currentColor, setColor }) {
 		isValid = false
 
 	let isAvatarValid = true
-	if (avatarValue.length == 0)
+	if (avatarValue.file === null)
 		isAvatarValid = false
 
 	const changeAvatarHandle = () => {
@@ -168,7 +168,10 @@ export default function Settings({ currentColor, setColor }) {
 				</Col>
 
 				<Col className="col-8">
-					<Form.Group onChange={e => setAvatarValue({file:e.target.files[0]})} value={avatarValue} controlId="formFile" className="mb-3">
+					<Form.Group onChange={e => {
+						const target = e.target as HTMLInputElement;
+						setAvatarValue({file:target.files[0]})
+					}} controlId="formFile" className="mb-3">
 						<Form.Label>Choose your avatar</Form.Label>
 						<Form.Control type="file" accept=".jpeg" />
 					</Form.Group>
