@@ -178,26 +178,26 @@ const Friends = () => {
 						<Card.Body className="mt-0">
 							<ListGroup>
 								{friendArray.map((friend, index) => (
-									<ListGroupItem key={index} className="p-3">
+									<ListGroupItem key={index} className="p-3" style={{overflowX:'auto'}}>
 												<Row>
 													<Col lg="2">
 														<UserStatus userId={friend.id} />
 													</Col>
 													<Col lg="3">
-														<img className="img-fluid" style={{width:'100px'}} src={friend.avatar}  alt={friend.nick} />
+														<img className="img-fluid"  src={friend.avatar}  alt={friend.nick} />
 													</Col>
 													<Col lg="3">
 														<b className="px-1">{friend.nick}</b>														
 													</Col>
 													<Col lg="4">
 														<Row>
-															<Col md="6">
+															<Col lg="6">
 																	<Button onClick={() => {
 																setActiveChatUser({nick:friend.nick , friend_id:friend.id})
 																setActiveChat(true)
 															}}  variant="success">Chat</Button>
 															</Col>
-															<Col md="6">
+															<Col lg="6">
 																<Button onClick={() => handleBlock(friend.nick)} variant="danger">Block</Button>
 															</Col>
 														</Row>						
