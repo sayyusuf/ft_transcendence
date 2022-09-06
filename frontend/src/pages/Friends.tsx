@@ -178,39 +178,32 @@ const Friends = () => {
 						<Card.Body className="mt-0">
 							<ListGroup>
 								{friendArray.map((friend, index) => (
-									<ListGroupItem key={index}>
-										<div className="d-flex justify-content-between">
-											<div>
+									<ListGroupItem key={index} className="p-3">
 												<Row>
-													<Col className="col-2">
+													<Col lg="2">
 														<UserStatus userId={friend.id} />
 													</Col>
-													<Col className="col-4">
-														<img style={{width:'100px'}} src={friend.avatar}  alt={friend.nick} />
+													<Col lg="3">
+														<img className="img-fluid" style={{width:'100px'}} src={friend.avatar}  alt={friend.nick} />
 													</Col>
-													<Col className="col-3">
+													<Col lg="3">
 														<b className="px-1">{friend.nick}</b>														
 													</Col>
-													<Col className="col-3">
+													<Col lg="4">
 														<Row>
-															<Col className="col-6">
+															<Col md="6">
 																	<Button onClick={() => {
 																setActiveChatUser({nick:friend.nick , friend_id:friend.id})
 																setActiveChat(true)
 															}}  variant="success">Chat</Button>
 															</Col>
-															<Col className="col-6">
-																<Button style={{ marginLeft: '8px' }} onClick={() => handleBlock(friend.nick)} variant="danger">Block</Button>
+															<Col md="6">
+																<Button onClick={() => handleBlock(friend.nick)} variant="danger">Block</Button>
 															</Col>
 														</Row>						
 																												
 													</Col>
 												</Row>
-											
-											</div>
-											
-
-										</div>
 									</ListGroupItem>
 								))}
 							</ListGroup>

@@ -219,16 +219,16 @@ export default function Settings({ currentColor, setColor }) {
 				<Col className="col-12">
 					{!factorState ? (
 						<Row>
-						<Col className="col-2" >
-							<img src={qrData}></img>
+						<Col md="2" >
+							<img alt="qrcode" className="img-fluid" src={qrData}></img>
 						</Col>
-						<Col className="col-10" >
+						<Col md="10" >
 							<p style={{width:'180px'}}>To enable two-factor authantication open your Google Authenticator app, scan the QR code and enter the 6-digit code on screen</p>
 						</Col>
-						<Col className="col-3 mt-2">
+						<Col md="3" className="mt-2">
 						<Form.Control  id="factor" type="number" min="0" />
 						</Col>
-						<Col className="col-4 mt-2">
+						<Col md="4" className="mt-2">
 							<Button onClick={changeFactorHandle}  variant="success">Enable</Button>
 						</Col>
 						</Row>

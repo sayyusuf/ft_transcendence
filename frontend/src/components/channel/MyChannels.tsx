@@ -1,4 +1,4 @@
-import {ListGroup, Modal, Form, Button } from 'react-bootstrap'
+import {ListGroup, Modal, Form, Button, Row,Col } from 'react-bootstrap'
 import { useAuth } from '../../context/AuthContext'
 import { useState } from 'react'
 
@@ -46,7 +46,6 @@ export default function MyChannels({ myChannels, setCurrentChannel }){
 			}
 		}
 	}
-
 	return (
 		<>
 			{myChannels.length > 0 ? (
@@ -55,12 +54,12 @@ export default function MyChannels({ myChannels, setCurrentChannel }){
 				<ListGroup>
 					{myChannels.map((chann, i) => (
 						<ListGroup.Item key={i}>
-							<div style={{
-										whiteSpace: `nowrap`,
-										overflow:`hidden`,
-										textOverflow:`ellipsis`,																
-									}}  >
-									<b > {chann.channel_name}   </b> 								
+								<div style={{
+											whiteSpace: `nowrap`,
+											overflow:`hidden`,
+											textOverflow:`ellipsis`,																
+										}}  >
+										<b > {chann.channel_name}   </b> 								
 								</div>
 								<div className="d-flex justify-content-between">
 									<a onClick={() => handleShowChannel(chann.channel_name)}  style={{cursor: 'pointer'}}  className="text-decoration-none"> Show </a>

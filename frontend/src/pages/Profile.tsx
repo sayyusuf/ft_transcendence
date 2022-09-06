@@ -119,7 +119,9 @@ const Profile = () => {
 												return (
 													<Col className="col-12" style={{padding: '6px'}} key={index}>
 														 <Card bg="success">
-															<Card.Title><h2 className="text-center">Win</h2></Card.Title>
+															 <Card.Header>
+															 	<Card.Title><h2 className="text-center">Win</h2></Card.Title>
+															 </Card.Header>															
 															<Card.Body>
 															<h2 className="text-center">
 															<span className="px-4">{userData.nick}</span>
