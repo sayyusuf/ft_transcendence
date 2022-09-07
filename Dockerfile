@@ -13,9 +13,8 @@ RUN npm run build
 WORKDIR /usr/src/app/backend/
 COPY srcs/backend/ .
 RUN npm install
-RUN npx prisma migrate deploy
 
 EXPOSE 3000
 EXPOSE 3334
 
-ENTRYPOINT cd /usr/src/app/backend && pm2 --name nestjs start npm -- start && cd /usr/src/app/frontend && pm2 --name react start npx -- serve -s build
+ENTRYPOINT cd /usr/src/app/backend && npx prisma migrate deploy && pm2 --name nestjs start npm -- start && cd /usr/src/app/frontend && pm2 --name react start npx -- serve -s build

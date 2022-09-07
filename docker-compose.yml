@@ -20,6 +20,7 @@ services:
       - trdb:/var/lib/postgresql/data
     networks:
       - app_net
+    restart: always
 
   app:
     build: ./
