@@ -11,6 +11,7 @@ localStorage.setItem('game_color', 'black')
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 const socket =  io(`${process.env.REACT_APP_API_URL}`)
+console.log(process.env.REACT_APP_API_URL)
 console.log('index.tsx')
 root.render(
   <BrowserRouter>
