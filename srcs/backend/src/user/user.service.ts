@@ -148,6 +148,7 @@ export class UserService {
 			let retUser
 			if (!userExist){
 				retUser = Object(await this.addNewUser(userData))
+				console.log('user eklendi')
 				retUser.coalition_img = userData.coalition_img
 				retUser.coalition_color = userData.coalition_color
 				return retUser
