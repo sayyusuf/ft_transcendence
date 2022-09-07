@@ -11,8 +11,9 @@ export const AuthProvider = ({ children, socket }) => {
 	
 	
 	useEffect(() => {
-		socket.on(user.id, (data) => {
+		socket.addEventListener(user.id, (data) => {
 			const parsed = JSON.parse(data)
+			console.log('geldi')
 			setMsgArr([...msgArr, parsed])
 		})
 		socket.on('hello', msg => console.log(msg))

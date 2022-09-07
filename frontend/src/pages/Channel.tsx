@@ -10,7 +10,7 @@ export default function Channel({ showInvite, setShowInvite }){
 	const [currentChannel, setCurrentChannel] = useState(-1)
 	const [myChannels, setMyChannels] = useState([])
 
-
+	console.log(myChannels)
 
 	return(
 		<>

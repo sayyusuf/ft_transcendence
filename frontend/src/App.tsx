@@ -11,6 +11,7 @@ import Friends from './pages/Friends'
 import Game from './pages/Game'
 import WatchGame from './pages/WatchGame'
 import Channel from "./pages/Channel";
+import NotFound from './pages/NotFound'
 import { useState } from 'react'
 
 function App() {
@@ -28,9 +29,10 @@ function App() {
               <Route path="game" element={<PrivateGameRoute> <Game currentColor={currentColor} /> </PrivateGameRoute>} />
               <Route path="channels" element={<PrivateGameRoute> <Channel showInvite={showInvite}  setShowInvite={setShowInvite} /> </PrivateGameRoute>} />
               <Route path="watch-game/:id" element={<PrivateGameRoute> <WatchGame/> </PrivateGameRoute>} />
-        </Route>      
+        </Route>
         <Route path="/login" element={<Login/>} />
         <Route path="/auth" element={<Authorize/>} />
+        <Route path="*"  element={<NotFound />} />
       </Routes>
     </>
   );

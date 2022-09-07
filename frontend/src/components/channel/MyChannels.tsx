@@ -14,6 +14,9 @@ export default function MyChannels({ myChannels, setCurrentChannel }){
 
 	const handleEdit = () => {
 		let passElem = (document.getElementById('formEditPassword') as HTMLInputElement)
+		let passVal = ''
+		if (passElem !== null)
+			passVal = passElem.value
 		if (Number((document.getElementById('formEditType') as HTMLInputElement ).value) !== 2 && passElem.value.length < 1)
 		{
 			alert('Password needed')
@@ -23,11 +26,12 @@ export default function MyChannels({ myChannels, setCurrentChannel }){
 			command: 'change_status',
 			user_id: user.id,
 			param1: Number((document.getElementById('formEditType') as HTMLInputElement ).value),
-			param2:  passElem !== undefined ? passElem.value : '',
+			param2:  passVal ,
 			channel_name: editChannel
 		}
 		console.log(payload)
 		socket.emit('ADMIN', JSON.stringify(payload) )
+		console.log('test')
 		setShowPass(false)
 		setShow(false)
 	}

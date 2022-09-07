@@ -292,7 +292,7 @@ win_loss_function(info) {
 }
 
 handleConnection(client: Socket, ...args: any[]) {
-  this.logger.log(`Client connect: ${client.id}`);
+  
 }
 
 @SubscribeMessage('connection')
@@ -307,7 +307,7 @@ handleNewConnectionFunction(client: Socket, data: any) {
       }
     client_array.push ({client_id : client.id, user_id : data[1], user_count : 1});
     waiting_room.push(client.id);
-    this.showWaitingRoom()
+    //this.showWaitingRoom()
     this.init_function([client.id, 0])
   } 
    else {

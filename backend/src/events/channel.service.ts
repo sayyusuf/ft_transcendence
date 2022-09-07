@@ -55,13 +55,14 @@ export class ChannelService {
     this.data = data;
 
     this.socket = io(`http://localhost:3334`);
-    this.socket.addEventListener(this.data.channel_id, (data) => {
-       this.sendAll(data);
+    this.socket.addEventListener(this.data.channel_id, async (data) => {
+       await this.sendAll(data);
     });
   }
 
   async sendAll(data: any) {
     let com = JSON.parse(data);
+    console.log(com)
     if (await this.isInChannel(com.sender) === false) return false;
     if (await this.isBanned(com.sender)) return false;
     if (await this.isMuted(com.sender)) return false;
@@ -74,11 +75,11 @@ export class ChannelService {
       data: com.data
     }
     for (let i = 0; i < this.data.users.length; i++) {
-      if (this.data.users[i].is_online === true) {
+      //if (this.data.users[i].is_online === true) {
         payload.target = this.data.users[i].user_id;
         this.socket.emit("PRIV", JSON.stringify(payload));
       //  this.data.users[i].socket.emit(this.data.users[i].user_id, JSON.stringify(payload));
-      }
+      //}
     }
   }
 

@@ -192,12 +192,14 @@ const Game = ({ currentColor }) => {
 				game_Start_flag = 0;
 				socket.on("status", statusHandle_function);
 				socket.off("in_game");
+				navigate('/')
+				alert('Your opponent disconnected')
 				c.clearRect(0, 0, canvas.width, canvas.height);
 				return
 			}
 			if(data === "stop") {
 				socket.emit('FINISH_GAME', user.id)
-				socket.off("in_game");
+				socket.off("in_game");			
 				c.clearRect(0, 0, canvas.width, canvas.height);
 				drawText("Game Finished or one of gameUser disconnected!", 40, canvas.height/2, 'black', c , "30px Arial");
 				drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");		
@@ -207,27 +209,33 @@ const Game = ({ currentColor }) => {
 			if(data === "won") {
 				socket.emit('FINISH_GAME', user.id)
 				socket.off("in_game");
-				c.clearRect(0, 0, canvas.width, canvas.height);
-				drawText("You Won !", 40, canvas.height/2, 'black', c , "30px Arial");
-				drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");
-				game_Start_flag = 4; //game finish;
 				axios.post(`${process.env.REACT_APP_API_URL}/user/set-status`, {
 					id: user.id,
 					status: 1
 				}).then(() => {})
+				navigate('/')
+				alert('You won the game')
+				// c.clearRect(0, 0, canvas.width, canvas.height);
+				// drawText("You Won !", 40, canvas.height/2, 'black', c , "30px Arial");
+				// drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");
+				// game_Start_flag = 4; //game finish;
+				
 				return
 			}
 			if(data === "loss") {
 				socket.emit('FINISH_GAME', user.id)
 				socket.off("in_game");
-				c.clearRect(0, 0, canvas.width, canvas.height);
-				drawText("You Lost !", 40, canvas.height/2, 'black', c , "30px Arial");
-				drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");
-				game_Start_flag = 4; //game finish;
 				axios.post(`${process.env.REACT_APP_API_URL}/user/set-status`, {
 					id: user.id,
 					status: 1
 				}).then(() => {})
+				navigate('/')
+				alert('You lost the game')
+				//c.clearRect(0, 0, canvas.width, canvas.height);
+				//drawText("You Lost !", 40, canvas.height/2, 'black', c , "30px Arial");
+				//drawText("Press Espace for Waiting Room", 40, canvas.height/2 + 100, 'black', c , "30px Arial");
+				//game_Start_flag = 4; //game finish;
+				
 				return
 			}
 			if(game_Start_flag) {
