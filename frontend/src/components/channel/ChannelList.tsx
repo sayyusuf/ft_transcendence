@@ -29,6 +29,10 @@ export default function ChannelList(  {myChannels, setMyChannels, setCurrentChan
 	
 	const handleCreateChannel = () => {
 		const chann_name = (document.getElementById('formChannelName') as HTMLInputElement).value
+		if (chann_name.length < 1){
+			alert('Channel name cannot be empty')
+			return
+		}
 		const type = (document.getElementById('formChannelType') as HTMLInputElement).value
 		let pass = null
 		let status = 2

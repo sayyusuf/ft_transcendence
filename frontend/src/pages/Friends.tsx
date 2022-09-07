@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import '../css/chat.css'
 import UserStatus from "../components/UserStatus";
+import { NavLink } from "react-router-dom";
 
 const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr, opponent }) => {
 	
@@ -22,8 +23,11 @@ const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr, opponent }) =>
    	const filterMessage = msgArr.filter((msg) => msg.sender === activeChatUser || (msg.sender === user.id &&  msg.target === activeChatUser));
 
 	const handleBtn = () => {
-		const pack  = {sender : user.id , target : activeChatUser, data : msg}
-		
+		if (msg.length < 1){
+			alert('Message cannot be empty')
+			return
+		}
+		const pack  = {sender : user.id , target : activeChatUser, data : msg}	
 		setMsgArr([...msgArr, pack])
 		setMsg('')
 		socket.emit('PRIV', JSON.stringify(pack))
@@ -187,7 +191,7 @@ const Friends = () => {
 														<img className="img-fluid"  src={friend.avatar}  alt={friend.nick} />
 													</Col>
 													<Col lg="3">
-														<b className="px-1">{friend.nick}</b>														
+														<NavLink to={`/profile/${friend.id}`} className="px-1 text-decoration-none">{friend.nick}</NavLink>														
 													</Col>
 													<Col lg="4">
 														<Row>
