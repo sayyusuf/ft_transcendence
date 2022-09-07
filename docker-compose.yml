@@ -20,16 +20,28 @@ services:
       - trdb:/var/lib/postgresql/data
     networks:
       - app_net
-    restart: unless-stopped
-
-  app:
+    restart: always
+  
+  front:
     build: ./
-    container_name: app
-    restart: unless-stopped
+    container_name: front
+    volumes:
+      - ./srcs/frontend/:/app
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      - app_net
+
+  back:
+    build: ./
+    container_name: back
+    restart: always
+    volumes:
+      - ./srcs/backend/:/app
     networks:
      - app_net
     ports:
-     - 3000:3000
      - 3334:3334
     depends_on:
      - db
@@ -40,4 +52,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /opt/devdb
+      device: /home/eharuni/devdb
