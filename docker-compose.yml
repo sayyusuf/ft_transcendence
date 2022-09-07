@@ -44,6 +44,7 @@ services:
      - app_net
     ports:
      - 3334:3334
+     - 5555:5555
     depends_on:
      - db
     command: sh -c 'npm install && npx prisma db push && npm run start:dev'
