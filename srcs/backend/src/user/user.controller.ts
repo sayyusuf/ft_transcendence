@@ -14,7 +14,6 @@ export class UserController {
 
 	@Get('auth')
 	async authUser(@Query('code') code:string){
-		console.log('code ==== ', code)
 		return await this.userService.authUser(code)
 	}
 

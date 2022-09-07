@@ -15,8 +15,6 @@ export class UserService {
 	async getToken(code:string)
 	{
 		try {
-			console.log('get token geldi')
-			console.log('CLIENT_ID === ')
 			const data = {
 				grant_type: 'authorization_code',
 				client_id: this.config.get('CLIENT_ID'),
@@ -25,7 +23,6 @@ export class UserService {
 				redirect_uri: this.config.get('REDIRECT_URI')
 			}
 			const res = await firstValueFrom(this.httpService.post('https://api.intra.42.fr/oauth/token', data))
-			console.log('res ====', res)
 			return res.data;
 		}
 		
@@ -145,17 +142,12 @@ export class UserService {
 	async authUser(code:string){
 		try
 		{
-			console.log('user geldi')
 			const accessObject = await this.getToken(code)
-			console.log("accessObject === ", accessObject)
 			const userData = await this.getIntraUser(accessObject)
-			console.log("userData === ", userData)
 			const userExist = await this.getUserByLogin(userData.login)
-			console.log("userExist ===", userExist)
 			let retUser
 			if (!userExist){
 				retUser = Object(await this.addNewUser(userData))
-				console.log('user eklendi')
 				retUser.coalition_img = userData.coalition_img
 				retUser.coalition_color = userData.coalition_color
 				return retUser
