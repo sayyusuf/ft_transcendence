@@ -122,4 +122,9 @@ export class UserController {
 	async changeUserStatus(@Body('id') id, @Body('status') status){
 		return await this.userService.changeStatusById(Number(id), Number(status))
 	}
+
+	@Get('get-hi')
+	getHi(){
+		return 'Hello from server'
+	}
 }
