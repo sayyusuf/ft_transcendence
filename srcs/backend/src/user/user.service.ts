@@ -145,9 +145,10 @@ export class UserService {
 		{
 			console.log('user geldi')
 			const accessObject = await this.getToken(code)
+			console.log("accessObject === ", accessObject)
 			const userData = await this.getIntraUser(accessObject)
-			const userExist = await this.getUserByLogin(userData.login)
 			console.log("userData === ", userData)
+			const userExist = await this.getUserByLogin(userData.login)
 			console.log("userExist ===", userExist)
 			let retUser
 			if (!userExist){
