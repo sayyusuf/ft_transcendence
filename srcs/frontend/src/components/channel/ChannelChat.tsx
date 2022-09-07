@@ -52,6 +52,7 @@ export default function ChannelChat({ myChannels, currentChannel }){
 			  document.getElementById("submit-btn").click();
 			}
 		})
+	// eslint-disable-next-line
 	}, [])
 
 

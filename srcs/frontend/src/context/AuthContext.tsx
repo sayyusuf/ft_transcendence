@@ -17,12 +17,14 @@ export const AuthProvider = ({ children, socket }) => {
 			setMsgArr([...msgArr, parsed])
 		})
 		socket.on('hello', msg => console.log(msg))
+	// eslint-disable-next-line
 	}, [msgArr])
 	
 	useEffect(() => {
 		socket.on('FEEDBACK', (msg) => {
 			alert(msg)
 		})
+	// eslint-disable-next-line
 	}, [])
 
 	const data = {

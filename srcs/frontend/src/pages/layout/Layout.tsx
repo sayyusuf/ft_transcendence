@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import { Outlet, NavLink, useNavigate } from "react-router-dom"
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
@@ -56,7 +57,7 @@ const Layout = ({ setShowInvite }) => {
 			//setInviteStatus(true)
 			handleShowOpponentInvite()
 		})
-
+	// eslint-disable-next-line
 	}, [])
 
 	return (

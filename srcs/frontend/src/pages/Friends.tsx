@@ -19,6 +19,7 @@ const Chat = ({ setActiveChat, activeChatUser, msgArr, setMsgArr, opponent }) =>
 				document.getElementById("submit-btn").click();
 			}
 		})
+	// eslint-disable-next-line
 	}, [])
    	const filterMessage = msgArr.filter((msg) => msg.sender === activeChatUser || (msg.sender === user.id &&  msg.target === activeChatUser));
 
@@ -153,7 +154,7 @@ const Friends = () => {
 				setBlockArray(blocks)
 			})
 			.catch(() => console.log('error'))
-		
+	// eslint-disable-next-line
 	}, [blockArray, refresh])
 
 	return (

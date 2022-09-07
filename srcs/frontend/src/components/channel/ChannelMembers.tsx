@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import { ListGroup, Button, Modal } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'

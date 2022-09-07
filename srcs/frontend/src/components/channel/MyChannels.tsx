@@ -1,4 +1,5 @@
-import {ListGroup, Modal, Form, Button, Row,Col } from 'react-bootstrap'
+/* eslint-disable jsx-a11y/anchor-is-valid */
+import {ListGroup, Modal, Form, Button} from 'react-bootstrap'
 import { useAuth } from '../../context/AuthContext'
 import { useState } from 'react'
 

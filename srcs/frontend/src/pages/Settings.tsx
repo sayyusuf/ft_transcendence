@@ -38,6 +38,7 @@ export default function Settings({ currentColor, setColor }) {
 			axios.post(`${process.env.REACT_APP_API_URL}/user/generate`, payload)
 			.then(res => setQRData(res.data))
 		}
+	// eslint-disable-next-line
 	},[factorState])
 
 	const changeFactorHandle = () => {

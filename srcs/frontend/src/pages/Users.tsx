@@ -14,6 +14,7 @@ const Users = () => {
 		.then(res => {
 			setUsers(res.data)		
 		})
+	// eslint-disable-next-line
 	}, [refresh])
 
 	const handleBlock = (nick) => {

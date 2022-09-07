@@ -25,6 +25,7 @@ export default function ChannelList(  {myChannels, setMyChannels, setCurrentChan
 	})
 	useEffect(() => {
 		socket.emit('ONLINE', JSON.stringify(send) )
+	// eslint-disable-next-line
 	}, [])
 	
 	const handleCreateChannel = () => {

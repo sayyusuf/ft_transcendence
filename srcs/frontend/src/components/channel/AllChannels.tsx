@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import {ListGroup, Modal, Form, Button } from 'react-bootstrap'
 import { useAuth } from '../../context/AuthContext'
 import { useEffect, useState } from 'react'
@@ -21,6 +22,7 @@ export default function AllChannels({ allChannels, myChannels }){
 				alert(`Joining failed`)
 			}
 		})
+	// eslint-disable-next-line
 	}, [])
 
 	for (let i = 0; i < channs.length; i++) {
@@ -90,7 +92,7 @@ export default function AllChannels({ allChannels, myChannels }){
 										)}
 									 </span>
 									 {chann.channel_status !== 0 ? (
-										 	<a onClick={() => handleJoin({ status: chann.channel_status, channel_name: chann.channel_name})}  style={{cursor: 'pointer'}}  className="text-decoration-none"> Join </a>
+										 	<a  onClick={() => handleJoin({ status: chann.channel_status, channel_name: chann.channel_name})}  style={{cursor: 'pointer'}}  className="text-decoration-none"> Join </a>
 									 ) :  ''}
 								
 								 </div>

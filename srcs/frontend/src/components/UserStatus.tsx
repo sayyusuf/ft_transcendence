@@ -22,6 +22,7 @@ const UserStatus = ({ userId }) => {
 		return () => {
 			clearInterval(interval)
 		}
+	// eslint-disable-next-line
 	}, [])
 
 	let color = null

@@ -85,7 +85,7 @@ useEffect(() => {
 	socket.emit("join-room_from_another_page", id)
 
 	
-
+	// eslint-disable-next-line
 	}, [])
 
 

@@ -42,6 +42,7 @@ const Profile = () => {
 			console.log(achievementData)
 			setAchievementData(res.data)
 		})
+	// eslint-disable-next-line
 	}, [])
 	
 

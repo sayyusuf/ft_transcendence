@@ -286,6 +286,7 @@ const Game = ({ currentColor }) => {
 			window.removeEventListener('unload', unloadHandler)
 			window.addEventListener('unload', handleGlobalUnload)
 		}
+	// eslint-disable-next-line
 	}, [])
 	
 	return (

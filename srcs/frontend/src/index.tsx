@@ -4,7 +4,6 @@ import App from './App';
 import {BrowserRouter} from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext';
 import handleGlobalUnload from './unload'
-import { useMemo } from 'react'
 
 window.onunload = handleGlobalUnload
 
