@@ -46,7 +46,7 @@ services:
      - 3334:3334
     depends_on:
      - db
-    command: sh -c 'npm install && npm run start:debug'
+    command: sh -c 'npm install && npx prisma migrate deploy && npm run start:debug'
 
 volumes:
   trdb:
