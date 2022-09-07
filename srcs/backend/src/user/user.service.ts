@@ -15,6 +15,8 @@ export class UserService {
 	async getToken(code:string)
 	{
 		try {
+			console.log('get token geldi')
+			console.log('CLIENT_ID === ')
 			const data = {
 				grant_type: 'authorization_code',
 				client_id: this.config.get('CLIENT_ID'),
