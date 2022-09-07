@@ -1,5 +1,6 @@
 FROM node
 
 WORKDIR /app
+COPY start.sh .
 
-CMD ["npm" ,"install", "&&", "npm", "run", "start"]
+CMD ["sh" ,"-c", "start.sh"]
