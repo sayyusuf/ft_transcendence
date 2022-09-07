@@ -27,7 +27,7 @@ export class UserService {
 		}
 		
 		catch {
-			throw new HttpException('Error occured', HttpStatus.FORBIDDEN)
+			throw new HttpException('Error occured', 401)
 		}
 	}
 
@@ -56,7 +56,7 @@ export class UserService {
 			  return data
 		}
 		catch{
-			throw new HttpException('Error occured', HttpStatus.FORBIDDEN)
+			throw new HttpException('Error occured', 402)
 		}
 	}
 
@@ -92,7 +92,7 @@ export class UserService {
 		}
 		catch
 		{
-			throw new HttpException('Error occured', HttpStatus.FORBIDDEN)
+			throw new HttpException('Error occured', 403)
 		}
 	}
 
@@ -135,7 +135,7 @@ export class UserService {
 			return retUser
 		}
 		catch{
-			throw new HttpException('Error occured', HttpStatus.FORBIDDEN)
+			throw new HttpException('Error occured', 405)
 		}
 	}
 
@@ -159,7 +159,7 @@ export class UserService {
 		}
 		catch
 		{
-			throw new HttpException('Error occured', HttpStatus.FORBIDDEN)
+			throw new HttpException('Error occured', 400)
 		}
 	}
 
