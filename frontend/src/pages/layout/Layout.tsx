@@ -68,6 +68,7 @@ const Layout = ({ setShowInvite }) => {
 					<NavLink to="/" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Home</NavLink>	
 					<NavLink to={`/profile/${user.id}`} className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Profile</NavLink>
 					<NavLink to="/settings" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Settings</NavLink>
+					<NavLink to="/users" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Users</NavLink>
 					<NavLink to="/friends" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Friends</NavLink>
 					<NavLink to="/channels" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Channels</NavLink>
 					<NavLink to="/game" className={isActive => "nav-link" + (!isActive.isActive ? "" : " active")}>Play</NavLink>

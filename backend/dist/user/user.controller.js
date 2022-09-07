@@ -53,11 +53,14 @@ let UserController = class UserController {
     async getFriends(id) {
         return await this.userService.getFriends(id);
     }
-    async blockFriend(id, nick) {
-        return await this.userService.blockFriend(Number(id), nick);
+    async blockFriend(id, nick, isFriend) {
+        return await this.userService.blockFriend(Number(id), nick, isFriend);
     }
     async getBlocks(id) {
         return await this.userService.getBlocks(id);
+    }
+    async getUsers(id) {
+        return await this.userService.getAllUsers(Number(id));
     }
     async getBlockedBys(id) {
         return await this.userService.getBlockedBys(id);
@@ -174,8 +177,9 @@ __decorate([
     (0, common_1.Post)('block-friend'),
     __param(0, (0, common_1.Body)('id')),
     __param(1, (0, common_1.Body)('nick')),
+    __param(2, (0, common_1.Body)('is_friend')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, String, Boolean]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "blockFriend", null);
 __decorate([
@@ -185,6 +189,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getBlocks", null);
+__decorate([
+    (0, common_1.Get)('get-users/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getUsers", null);
 __decorate([
     (0, common_1.Post)('get-blocked-bys'),
     __param(0, (0, common_1.Body)('id')),

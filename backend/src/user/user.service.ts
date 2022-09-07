@@ -6,6 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ChangeNickDto } from './dto/changenick.dto';
 import * as speakeasy from "speakeasy";
 import * as qrcode from "qrcode";
+import { User } from '.prisma/client';
 
 @Injectable()
 export class UserService {
@@ -261,7 +262,6 @@ export class UserService {
 			if (user.blockeds[index] === friendId)
 				return true
 		}
-		console.log('false dondu')
 		return false
 	}
 
@@ -328,7 +328,7 @@ export class UserService {
 		return friendArray
 	}
 
-	async blockFriend(id, nick){
+	async blockFriend(id, nick, isFriend){
 		try{
 			const userExist = await this.getUserById(id)
 			if (!userExist)
@@ -339,7 +339,6 @@ export class UserService {
 			const alreadyBlocked = await this.isBlocked(userExist, userWithNickExist.id)
 			if (alreadyBlocked)
 				throw new HttpException('User already blocked', HttpStatus.FORBIDDEN)
-			console.log('niye gelmiyo')
 			await this.context.user.update({
 				where:{
 					id:id
@@ -360,28 +359,30 @@ export class UserService {
 					}
 				}
 			})
+			if (isFriend === true){
+				const friendArr = userExist.friends
+				friendArr.splice(friendArr.indexOf(userWithNickExist.id), 1)
+				await this.context.user.update({
+					where:{
+						id:userExist.id
+					},
+					data:{
+						friends: friendArr
+					}
+				})
 
-			const friendArr = userExist.friends
-			friendArr.splice(friendArr.indexOf(userWithNickExist.id), 1)
-			await this.context.user.update({
-				where:{
-					id:userExist.id
-				},
-				data:{
-					friends: friendArr
-				}
-			})
-
-			const friendArr2 = userWithNickExist.friends
-			friendArr2.splice(friendArr2.indexOf(userExist.id), 1)
-			await this.context.user.update({
-				where:{
-					id:userWithNickExist.id
-				},
-				data:{
-					friends: friendArr2
-				}
-			})
+				const friendArr2 = userWithNickExist.friends
+				friendArr2.splice(friendArr2.indexOf(userExist.id), 1)
+				await this.context.user.update({
+					where:{
+						id:userWithNickExist.id
+					},
+					data:{
+						friends: friendArr2
+					}
+				})
+			}
+			
 			return { nick:nick }
 		}
 		catch{
@@ -472,6 +473,29 @@ export class UserService {
 			return jsonCopy
 		})
 		return Promise.all(retData)
+	}
+
+	async amIBlocked(user: User, id:number){
+		for (let i = 0; i < user.blockedBy.length; i++) {
+			if (id === user.blockedBy[i])
+				return true
+		}
+		return false
+	}
+
+	async getAllUsers(id: number){
+		const myself = await this.context.user.findUnique({ where:{ id:id } })
+		if (!myself) throw new HttpException('User not exist', HttpStatus.FORBIDDEN)
+
+		const retArr : User[] = []
+		const allUsers = await this.context.user.findMany()
+		for (let i = 0; i < allUsers.length; i++) {
+			if (await this.isAlreadyFriend(myself, allUsers[i].id) === false && await this.isBlocked(myself, allUsers[i].id) === false 
+			&& await this.amIBlocked(myself, allUsers[i].id) === false && allUsers[i].id !== myself.id){
+				retArr.push(allUsers[i])
+			}
+		}
+		return retArr
 	}
 
 	async getAchievementsById(id){

@@ -18,10 +18,11 @@ export declare class UserController {
         nick: any;
     }>;
     getFriends(id: any): Promise<any[]>;
-    blockFriend(id: any, nick: any): Promise<{
+    blockFriend(id: any, nick: string, isFriend: Boolean): Promise<{
         nick: any;
     }>;
     getBlocks(id: any): Promise<any[]>;
+    getUsers(id: any): Promise<import(".prisma/client").User[]>;
     getBlockedBys(id: any): Promise<any[]>;
     removeBlock(id: any, nick: any): Promise<{
         nick: any;

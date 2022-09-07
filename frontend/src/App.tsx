@@ -13,6 +13,7 @@ import WatchGame from './pages/WatchGame'
 import Channel from "./pages/Channel";
 import NotFound from './pages/NotFound'
 import { useState } from 'react'
+import Users from './pages/Users'
 
 function App() {
   const [showInvite, setShowInvite] = useState(false);
@@ -25,6 +26,7 @@ function App() {
               <Route index={true} element={<PrivateRoute> <Dashboard/> </PrivateRoute>} />
               <Route path="profile/:id" element={<PrivateRoute> <Profile/> </PrivateRoute>} />
               <Route path="settings" element={<PrivateRoute> <Settings currentColor={currentColor} setColor={setColor} /> </PrivateRoute>} />
+              <Route path="users" element={<PrivateRoute> <Users/> </PrivateRoute>} />
               <Route path="friends" element={<PrivateRoute> <Friends/> </PrivateRoute>} />
               <Route path="game" element={<PrivateGameRoute> <Game currentColor={currentColor} /> </PrivateGameRoute>} />
               <Route path="channels" element={<PrivateGameRoute> <Channel showInvite={showInvite}  setShowInvite={setShowInvite} /> </PrivateGameRoute>} />

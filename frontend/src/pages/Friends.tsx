@@ -108,16 +108,16 @@ const Friends = () => {
 	const handleBlock = (nick) => {
 		const payload = {
 			id: user.id,
-			nick: nick
+			nick: nick,
+			is_friend:true
 		}
-
 		axios.post(`${process.env.REACT_APP_API_URL}/user/block-friend`, payload)
 			.then((response) => {
 				setRefresh(!refresh)
 				alert(`${response.data.nick} blocked`)			
 			})
 			.catch(() => {
-				alert(`User with nickname: ${addNick} couldnt be blocked`)			
+				alert(`User with nickname: ${nick} couldnt be blocked`)			
 			})
 	}
 
@@ -132,7 +132,7 @@ const Friends = () => {
 				setRefresh(!refresh)
 			})
 			.catch(() => {
-				alert(`User with nickname: ${addNick}  couldnt be unblocked`)
+				alert(`User with nickname: ${nick}  couldnt be unblocked`)
 			})
 	}
 

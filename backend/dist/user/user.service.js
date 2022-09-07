@@ -242,7 +242,6 @@ let UserService = class UserService {
             if (user.blockeds[index] === friendId)
                 return true;
         }
-        console.log('false dondu');
         return false;
     }
     async isAlreadyFriend(user, friendId) {
@@ -305,7 +304,7 @@ let UserService = class UserService {
         }
         return friendArray;
     }
-    async blockFriend(id, nick) {
+    async blockFriend(id, nick, isFriend) {
         try {
             const userExist = await this.getUserById(id);
             if (!userExist)
@@ -316,7 +315,6 @@ let UserService = class UserService {
             const alreadyBlocked = await this.isBlocked(userExist, userWithNickExist.id);
             if (alreadyBlocked)
                 throw new common_1.HttpException('User already blocked', common_1.HttpStatus.FORBIDDEN);
-            console.log('niye gelmiyo');
             await this.context.user.update({
                 where: {
                     id: id
@@ -337,26 +335,28 @@ let UserService = class UserService {
                     }
                 }
             });
-            const friendArr = userExist.friends;
-            friendArr.splice(friendArr.indexOf(userWithNickExist.id), 1);
-            await this.context.user.update({
-                where: {
-                    id: userExist.id
-                },
-                data: {
-                    friends: friendArr
-                }
-            });
-            const friendArr2 = userWithNickExist.friends;
-            friendArr2.splice(friendArr2.indexOf(userExist.id), 1);
-            await this.context.user.update({
-                where: {
-                    id: userWithNickExist.id
-                },
-                data: {
-                    friends: friendArr2
-                }
-            });
+            if (isFriend === true) {
+                const friendArr = userExist.friends;
+                friendArr.splice(friendArr.indexOf(userWithNickExist.id), 1);
+                await this.context.user.update({
+                    where: {
+                        id: userExist.id
+                    },
+                    data: {
+                        friends: friendArr
+                    }
+                });
+                const friendArr2 = userWithNickExist.friends;
+                friendArr2.splice(friendArr2.indexOf(userExist.id), 1);
+                await this.context.user.update({
+                    where: {
+                        id: userWithNickExist.id
+                    },
+                    data: {
+                        friends: friendArr2
+                    }
+                });
+            }
             return { nick: nick };
         }
         catch (_a) {
@@ -442,6 +442,27 @@ let UserService = class UserService {
             return jsonCopy;
         });
         return Promise.all(retData);
+    }
+    async amIBlocked(user, id) {
+        for (let i = 0; i < user.blockedBy.length; i++) {
+            if (id === user.blockedBy[i])
+                return true;
+        }
+        return false;
+    }
+    async getAllUsers(id) {
+        const myself = await this.context.user.findUnique({ where: { id: id } });
+        if (!myself)
+            throw new common_1.HttpException('User not exist', common_1.HttpStatus.FORBIDDEN);
+        const retArr = [];
+        const allUsers = await this.context.user.findMany();
+        for (let i = 0; i < allUsers.length; i++) {
+            if (await this.isAlreadyFriend(myself, allUsers[i].id) === false && await this.isBlocked(myself, allUsers[i].id) === false
+                && await this.amIBlocked(myself, allUsers[i].id) === false && allUsers[i].id !== myself.id) {
+                retArr.push(allUsers[i]);
+            }
+        }
+        return retArr;
     }
     async getAchievementsById(id) {
         const userExist = await this.getUserById(id);

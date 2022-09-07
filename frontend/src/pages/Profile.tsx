@@ -51,7 +51,7 @@ const Profile = () => {
 				<Card.Body>
 					<Row>
 						<Col className="col-3">
-							<img src={`${userData.avatar}`} alt={userData.nick} width="100%" className="rounded-circle" />
+							<img src={`${userData.avatar}`} alt={userData.nick} className="rounded-circle" width="270"  height="270px" />
 						</Col>
 						<Col className="col-4">
 							<Card className="card-dark">
