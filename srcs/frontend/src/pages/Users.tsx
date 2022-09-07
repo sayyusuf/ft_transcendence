@@ -50,8 +50,8 @@ const Users = () => {
 	return (
 		<>
 			<Table className="bg-white table-responsive" bordered hover>
-				<thead>
-					<tr>
+				<thead className="bg-primary">
+					<tr className="text-white">
 					<th>Username</th>
 					<th>Avatar</th>
 					<th>ADD</th>
@@ -70,7 +70,7 @@ const Users = () => {
 								<Button onClick={() => handleBlock(user.nick)} variant="danger">Block</Button>
 							</td>
 						</tr>
-					) )}					
+					) )}
 				</tbody>
 			</Table>
 		</>

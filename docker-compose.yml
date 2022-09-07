@@ -1,8 +1,12 @@
 version: "3.3"
 
+networks:
+  app_net:
+   driver: bridge
+
 services:
   db:
-    image: postgres:13
+    image: postgres
     container_name: db
     ports:
       - 5432:5432
@@ -11,36 +15,25 @@ services:
       POSTGRES_PASSWORD: 123
       POSTGRES_DB: nest
     networks:
-      - transnet
+      - app_net
     volumes:
       - trdb:/var/lib/postgresql/data
-
-  backend:
-    image: backend
-    build: ./backend
-    container_name: backend
-    ports:
-      - 3334:3334
-      - 5555:5555
     networks:
-      - transnet
-    depends_on:
-      - db
+      - app_net
 
-  frontend:
-    image: frontend
-    build: ./frontend
-    container_name: frontend
-    ports:
-      - 3000:3000
-    networks:
-      - transnet
-    depends_on:
-      - db
-      - backend
-
-networks:
-  transnet:
+    app:
+      build: ./
+      container_name: app
+      restart: always
+      env_file:
+       - .env
+      networks:
+       - app_net
+      ports:
+       - 3000:3000
+       - 3334:3334
+      depends_on:
+       - db
 
 volumes:
   trdb:
@@ -48,4 +41,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/unicorn/devdb
+      device: /opt/devdb
