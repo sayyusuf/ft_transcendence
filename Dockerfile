@@ -1,7 +1,5 @@
 FROM node
 
 WORKDIR /app
-RUN npm install
 
-
-CMD ["npm", "run", "start"]
+CMD "npm install && npm run start"
