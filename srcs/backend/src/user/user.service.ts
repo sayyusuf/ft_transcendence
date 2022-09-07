@@ -23,6 +23,7 @@ export class UserService {
 				redirect_uri: this.config.get('REDIRECT_URI')
 			}
 			const res = await firstValueFrom(this.httpService.post('https://api.intra.42.fr/oauth/token', data))
+			console.log('res ====', res)
 			return res.data;
 		}
 		
@@ -142,6 +143,7 @@ export class UserService {
 	async authUser(code:string){
 		try
 		{
+			console.log('user geldi')
 			const accessObject = await this.getToken(code)
 			const userData = await this.getIntraUser(accessObject)
 			const userExist = await this.getUserByLogin(userData.login)
