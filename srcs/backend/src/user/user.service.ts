@@ -145,6 +145,8 @@ export class UserService {
 			const accessObject = await this.getToken(code)
 			const userData = await this.getIntraUser(accessObject)
 			const userExist = await this.getUserByLogin(userData.login)
+			console.log("userData === ", userData)
+			console.log("userExist ===", userExist)
 			let retUser
 			if (!userExist){
 				retUser = Object(await this.addNewUser(userData))
